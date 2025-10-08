@@ -1,0 +1,52 @@
+# ====== BACKEND (Spring Boot / Maven) ======
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/
+mvnw
+mvnw.cmd
+
+# IntelliJ / Eclipse / VSCode
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.vscode/
+
+# Logs y temporales
+logs/
+*.log
+*.tmp
+hs_err_pid*
+.DS_Store
+
+# Sistema operativo
+Thumbs.db
+ehthumbs.db
+
+# Credenciales y entorno
+*.env
+*.local
+*.properties.local
+*.yml.local
+
+# ====== FRONTEND (Angular) ======
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.cache/
+frontend/.env
+frontend/.env.local
+
+# ====== Testing / Coverage ======
+*.lcov
+coverage/
+test-output/
+reports/
+
+# ====== Misc ======
+*.bak
+*.swp
+*.orig
