@@ -1,4 +1,4 @@
-package miApp.habit.auth;
+package miapp.habit.auth;
 
 
 import io.jsonwebtoken.*;

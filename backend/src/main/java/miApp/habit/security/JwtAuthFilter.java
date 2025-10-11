@@ -1,7 +1,7 @@
-package miApp.habit.security;
+package miapp.habit.security;
 
 
-import miApp.habit.auth.JwtService;
+import miapp.habit.auth.JwtService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

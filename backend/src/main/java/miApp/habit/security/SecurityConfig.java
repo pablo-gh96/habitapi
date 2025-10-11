@@ -1,4 +1,4 @@
-package miApp.habit.security;
+package miapp.habit.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

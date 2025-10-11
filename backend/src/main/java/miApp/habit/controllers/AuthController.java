@@ -1,8 +1,11 @@
-package miApp.habit.auth;
+package miapp.habit.controllers;
 
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import miapp.habit.auth.JwtService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
