@@ -1,12 +1,12 @@
 <div class="min-h-screen bg-gray-50">
   <header class="mx-auto max-w-5xl px-4 pt-10">
-    <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Acceder</h1>
-    <p class="text-sm text-gray-500">Entra para ver tu calendario</p>
+    <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Crear cuenta</h1>
+    <p class="text-sm text-gray-500">Regístrate para empezar a usar tu calendario</p>
   </header>
 
   <main class="mx-auto max-w-5xl px-4 py-8">
     <div class="mx-auto max-w-md rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200">
-      <h2 class="mb-4 text-lg font-semibold text-gray-900">Login</h2>
+      <h2 class="mb-4 text-lg font-semibold text-gray-900">Registro</h2>
 
       <!-- Mensajes del servidor -->
       <div *ngIf="serverMsg()" class="mb-3 rounded-lg px-3 py-2 text-sm"
@@ -24,7 +24,7 @@
           <input
             formControlName="name"
             type="text"
-            placeholder="Tu nombre"
+            placeholder="Elige un nombre"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
           />
           <div class="mt-1 text-xs text-rose-600" *ngIf="form.controls.name.touched && form.controls.name.invalid">
@@ -46,15 +46,30 @@
           </div>
         </div>
 
+        <!-- confirm -->
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">Repite la contraseña</label>
+          <input
+            formControlName="confirm"
+            type="password"
+            placeholder="•••••••"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+          />
+          <div class="mt-1 text-xs text-rose-600"
+               *ngIf="form.controls.confirm.touched && form.controls.confirm.invalid">
+            Debes confirmar la contraseña.
+          </div>
+        </div>
+
         <!-- acciones -->
         <div class="pt-2 flex justify-end gap-2">
-          <a routerLink="/register" class="text-sm text-gray-600 hover:underline">Crear cuenta</a>
+          <a routerLink="/login" class="text-sm text-gray-600 hover:underline">Ya tengo cuenta</a>
           <button
             type="submit"
             [disabled]="form.invalid || loading()"
             class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 active:scale-[0.98]"
           >
-            {{ loading() ? 'Entrando…' : 'Entrar' }}
+            {{ loading() ? 'Creando…' : 'Crear cuenta' }}
           </button>
         </div>
       </form>
