@@ -1,24 +1,23 @@
 import { Component, computed, effect, signal, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { Habit } from '../models/habit';
 import { HabitService } from '../services/habit.services';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
 @Component({
-  selector: 'app-profile-page',
+  selector: 'app-public-calendar',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './profile-page.component.html'
+  templateUrl: './public-calendar.component.html'
 })
-export class ProfilePageComponent implements OnInit {
+export class PublicCalendarComponent implements OnInit {
 
-  // 👇 Parametrizable desde fuera
+  /* 👇 estos vienen de fuera (feed) */
   @Input() userId!: number;
   @Input() userName: string = 'Usuario';
   @Input() avatarUrl: string = 'https://api.dicebear.com/9.x/initials/svg?seed=User';
-  @Input() readOnly = false; // en feed lo usaremos en solo-lectura
 
   readonly baseDate = signal(startOfMonth(new Date()));
   readonly monthLabel = computed(() =>
@@ -35,23 +34,13 @@ export class ProfilePageComponent implements OnInit {
   prevMonth() { this.baseDate.set(updateMonth(this.baseDate(), -1)); }
   nextMonth() { this.baseDate.set(updateMonth(this.baseDate(), +1)); }
 
-  readonly showCreateModal = signal(false);
-  createForm!: FormGroup;
-
-  constructor(private habitService: HabitService, private fb: FormBuilder) {}
+  constructor(private habitService: HabitService) {}
 
   ngOnInit(): void {
-    const today = toLocalKey(new Date());
-    this.createForm = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(80)]],
-      icon: ['', [Validators.required, Validators.maxLength(8)]],
-      date: [today, [Validators.required]],
-      repeat: ['once', Validators.required]
-    });
+    // no hay formulario ni creación aquí
   }
 
   private _loadEff = effect(() => {
-    // cuando cambie el mes o el userId, recarga
     const current = this.baseDate();
     if (!this.userId) return;
     const year = current.getFullYear();
@@ -84,37 +73,9 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
-  openCreateModal() {
-    if (this.readOnly) return;
-    const today = toLocalKey(new Date());
-    this.createForm.reset({ title: '', icon: '', date: today, repeat: 'once' });
-    this.showCreateModal.set(true);
-  }
-  closeCreateModal() { this.showCreateModal.set(false); }
-
-  submitCreate() {
-    if (this.readOnly || this.createForm.invalid) return;
-    const v = this.createForm.getRawValue();
-    const payload = {
-      title: v.title,
-      icon: v.icon,
-      date: v.date,
-      repeat: (v.repeat as string).toUpperCase() as any,
-      userId: this.userId
-    };
-    this.habitService.create(payload as any).subscribe({
-      next: () => { this.reloadCurrentMonth(); this.closeCreateModal(); },
-      error: (err) => { console.error('❌ Error al crear hábito:', err); alert('Error al crear el hábito'); }
-    });
-  }
-
-  onHabitClick(h: Habit) {
-    if (this.readOnly) return;
-    this.habitService.updateStatus(this.userId, h.id).subscribe({
-      next: () => this.reloadCurrentMonth(),
-      error: (err) => console.error('❌ Error al cambiar estado:', err)
-    });
-  }
+  // click en icono: aquí no hacemos toggle (solo lectura). Si quisieras,
+  // podrías emitir un evento al padre en lugar de mutar.
+  onHabitClick(_h: Habit) { /* no-op en público */ }
 
   statusClasses(status: Habit['status']): string {
     switch (status) {
@@ -125,6 +86,7 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
+  // modal de día (solo visualización)
   readonly showDayModal = signal(false);
   readonly selectedDay = signal<Date | null>(null);
   readonly selectedDayHabits = computed(() => {
@@ -133,48 +95,9 @@ export class ProfilePageComponent implements OnInit {
   });
   openDayModal(d: Date) { this.selectedDay.set(d); this.showDayModal.set(true); }
   closeDayModal() { this.showDayModal.set(false); }
-
-  onDeleteHabit(h: Habit) {
-    if (this.readOnly) return;
-    this.habitService.delete(this.userId, h.id).subscribe({
-      next: () => this.reloadCurrentMonth(),
-      error: (err) => console.error('❌ Error al borrar hábito:', err)
-    });
-  }
-
-  private reloadCurrentMonth() {
-    const d = this.baseDate();
-    this.loadMonth(d.getFullYear(), d.getMonth() + 1);
-  }
-
-  readonly showConfirmModal = signal(false);
-  private habitToDelete: Habit | null = null;
-
-  openConfirmDelete(h: Habit) {
-    if (this.readOnly) return;
-    this.habitToDelete = h;
-    this.showConfirmModal.set(true);
-  }
-  closeConfirmDelete() { this.showConfirmModal.set(false); this.habitToDelete = null; }
-
-  confirmDeleteSingle() {
-    if (!this.habitToDelete || this.readOnly) return;
-    this.habitService.delete(this.userId, this.habitToDelete.id).subscribe({
-      next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
-      error: (err) => console.error('❌ Error al borrar por id:', err)
-    });
-  }
-  confirmDeleteAll() {
-    if (!this.habitToDelete || this.readOnly) return;
-    const title = this.habitToDelete.title;
-    this.habitService.deleteByTitle(this.userId, title).subscribe({
-      next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
-      error: (err) => console.error('❌ Error al borrar por título:', err)
-    });
-  }
 }
 
-/* ===== Helpers (igual que tenías) ===== */
+/* ===== helpers (idénticos) ===== */
 function startOfMonth(d: Date): Date { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function updateMonth(d: Date, delta: number): Date { const nd = new Date(d); nd.setMonth(nd.getMonth() + delta); return startOfMonth(nd); }
 function startOfWeekMonday(d: Date): Date { const day = (d.getDay() + 6) % 7; const sd = new Date(d); sd.setDate(d.getDate() - day); sd.setHours(0,0,0,0); return sd; }
