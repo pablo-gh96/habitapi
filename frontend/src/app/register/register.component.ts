@@ -13,7 +13,6 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
 
-  loading = signal(false);
   serverMsg = signal<{ type: 'ok' | 'error'; text: string } | null>(null);
 
   form = this.fb.group({
@@ -38,19 +37,15 @@ export class RegisterComponent {
       return;
     }
 
-    this.loading.set(true);
     this.auth.register({ name, password }).subscribe({
       next: (res) => {
         const text = res?.message ?? 'Usuario creado correctamente';
         this.serverMsg.set({ type: 'ok', text });
-        // Opcional: navegar a /login tras unos segundos
-        // setTimeout(() => this.router.navigate(['/login']), 800);
       },
       error: (err) => {
         const text = err?.error?.error ?? 'No se pudo crear el usuario';
         this.serverMsg.set({ type: 'error', text });
       },
-      complete: () => this.loading.set(false),
     });
   }
 }

@@ -13,17 +13,17 @@ import java.util.Map;
 @CrossOrigin(origins = "*") // Permite peticiones desde el frontend
 public class UserController {
 
-    private final UserService service;
+    private final UserService userService;
 
-    public UserController(UserService service) {
-        this.service = service;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     // 🧾 Crear cuenta
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
-            User created = service.createAccount(user);
+        	userService.createAccount(user);
             return ResponseEntity.ok(Map.of(
                     "message", "Usuario creado correctamente"
             ));
@@ -35,7 +35,7 @@ public class UserController {
     // 🔐 Login simple
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        return service.login(user)
+        return userService.login(user)
                 .map(u -> ResponseEntity.ok(Map.of(
                         "user", u.getName(),
                         "id", u.getId()

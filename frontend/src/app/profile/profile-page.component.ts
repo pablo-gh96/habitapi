@@ -6,6 +6,9 @@ import { HabitService } from '../services/habit.services';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
+// TODO: sustituir por el id real cuando tengas login
+const USER_ID = 1;
+
 @Component({
   selector: 'app-profile-page',
   standalone: true,
@@ -38,13 +41,12 @@ export class ProfilePageComponent implements OnInit {
   constructor(private habitService: HabitService, private fb: FormBuilder) {}
 
   ngOnInit(): void {
-    // inicializamos el formulario dentro del ciclo de vida, ya con fb disponible
     const today = toLocalKey(new Date());
     this.createForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(80)]],
+      title: ['', [Validators.required, Validators.maxLength(80)]], // <- title (no name)
       icon: ['', [Validators.required, Validators.maxLength(8)]],
       date: [today, [Validators.required]],
-      repeat: ['once', Validators.required]
+      repeat: ['once', Validators.required] // se convertirá a MAYÚSCULAS al enviar
     });
   }
 
@@ -56,10 +58,16 @@ export class ProfilePageComponent implements OnInit {
   });
 
   private loadMonth(year: number, month: number): void {
-    this.habitService.getHabits(year, month).subscribe({
+    this.habitService.getHabits(USER_ID, year, month).subscribe({
       next: (items) => {
+        // Normaliza status y agrupa por fecha
         const map = new Map<string, Habit[]>();
-        for (const h of items) {
+        for (const raw of items) {
+          const h: Habit = {
+            ...raw,
+            // si backend devuelve "DONE", "UNDEFINED"... pásalo a minúsculas
+            status: (raw.status as any)?.toString().toLowerCase()
+          };
           const key = typeof h.date === 'string'
             ? (h.date as string).slice(0, 10)
             : toLocalKey(new Date(h.date));
@@ -78,7 +86,7 @@ export class ProfilePageComponent implements OnInit {
 
   openCreateModal() {
     const today = toLocalKey(new Date());
-    this.createForm.reset({ name: '', icon: '', date: today, repeat: 'once' });
+    this.createForm.reset({ title: '', icon: '', date: today, repeat: 'once' });
     this.showCreateModal.set(true);
   }
 
@@ -87,31 +95,37 @@ export class ProfilePageComponent implements OnInit {
   }
 
   submitCreate() {
-  if (this.createForm.invalid) return;
+    if (this.createForm.invalid) return;
 
-  const value = this.createForm.getRawValue();
+    const v = this.createForm.getRawValue();
+    const payload = {
+      title: v.title,
+      icon: v.icon,
+      date: v.date, // 'YYYY-MM-DD'
+      repeat: (v.repeat as string).toUpperCase() as any, // ONCE|DAILY|WEEKLY|MONTHLY
+      userId: USER_ID
+    };
 
-  this.habitService.create(value).subscribe({
-    next: () => {
-      this.reloadCurrentMonth()
-      this.closeCreateModal();
-    },
-    error: (err) => {
-      console.error('❌ Error al crear hábito:', err);
-      alert('Error al crear el hábito');
-    }
-  });
-  
-}
-    onHabitClick(h: Habit) {
-    this.habitService.updateStatus(h.id).subscribe({
-        next: () => this.reloadCurrentMonth(),
-        error: (err) => {
-        console.error('❌ Error al cambiar estado:', err);
-        // opcional: mostrar toast/alert
-        }
+    this.habitService.create(payload as any).subscribe({
+      next: () => {
+        this.reloadCurrentMonth();
+        this.closeCreateModal();
+      },
+      error: (err) => {
+        console.error('❌ Error al crear hábito:', err);
+        alert('Error al crear el hábito');
+      }
     });
-}
+  }
+
+  onHabitClick(h: Habit) {
+    this.habitService.updateStatus(USER_ID, h.id).subscribe({
+      next: () => this.reloadCurrentMonth(),
+      error: (err) => {
+        console.error('❌ Error al cambiar estado:', err);
+      }
+    });
+  }
 
   statusClasses(status: Habit['status']): string {
     switch (status) {
@@ -122,76 +136,73 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
-    // --- Modal "tareas del día" ---
-    readonly showDayModal = signal(false);
-    readonly selectedDay = signal<Date | null>(null);
+  // --- Modal "tareas del día" ---
+  readonly showDayModal = signal(false);
+  readonly selectedDay = signal<Date | null>(null);
 
-    // Habitos del día seleccionado
-    readonly selectedDayHabits = computed(() => {
+  readonly selectedDayHabits = computed(() => {
     const d = this.selectedDay();
     return d ? this.getHabitsFor(d) : [];
-    });
+  });
 
-    openDayModal(d: Date) {
+  openDayModal(d: Date) {
     this.selectedDay.set(d);
     this.showDayModal.set(true);
-    }
-    closeDayModal() {
+  }
+  closeDayModal() {
     this.showDayModal.set(false);
-    }
-  
-    onDeleteHabit(h: Habit) {
-    this.habitService.delete(h.id).subscribe({
-        next: () => this.reloadCurrentMonth(),
-        error: (err) => console.error('❌ Error al borrar hábito:', err)
-    });
-    }
+  }
 
-    // Si no lo tienes aún:
-    private reloadCurrentMonth() {
+  onDeleteHabit(h: Habit) {
+    this.habitService.delete(USER_ID, h.id).subscribe({
+      next: () => this.reloadCurrentMonth(),
+      error: (err) => console.error('❌ Error al borrar hábito:', err)
+    });
+  }
+
+  private reloadCurrentMonth() {
     const d = this.baseDate();
     this.loadMonth(d.getFullYear(), d.getMonth() + 1);
-    }
+  }
 
-    // --- Confirmación de borrado ---
-    readonly showConfirmModal = signal(false);
-    private habitToDelete: Habit | null = null;
+  // --- Confirmación de borrado ---
+  readonly showConfirmModal = signal(false);
+  private habitToDelete: Habit | null = null;
 
-    openConfirmDelete(h: Habit) {
+  openConfirmDelete(h: Habit) {
     this.habitToDelete = h;
     this.showConfirmModal.set(true);
-    }
+  }
 
-    closeConfirmDelete() {
+  closeConfirmDelete() {
     this.showConfirmModal.set(false);
     this.habitToDelete = null;
-    }
+  }
 
-    // Borrar SOLO esta ocurrencia (por id)
-    confirmDeleteSingle() {
+  // Borrar SOLO esta ocurrencia (por id)
+  confirmDeleteSingle() {
     if (!this.habitToDelete) return;
-    this.habitService.delete(this.habitToDelete.id).subscribe({
-        next: () => {
+    this.habitService.delete(USER_ID, this.habitToDelete.id).subscribe({
+      next: () => {
         this.closeConfirmDelete();
         this.reloadCurrentMonth();
-        },
-        error: (err) => console.error('❌ Error al borrar por id:', err)
+      },
+      error: (err) => console.error('❌ Error al borrar por id:', err)
     });
-    }
+  }
 
-    // Borrar TODAS las ocurrencias con el mismo título
-    confirmDeleteAll() {
+  // Borrar TODAS las ocurrencias con el mismo título
+  confirmDeleteAll() {
     if (!this.habitToDelete) return;
     const title = this.habitToDelete.title;
-    this.habitService.deleteByTitle(title).subscribe({
-        next: () => {
+    this.habitService.deleteByTitle(USER_ID, title).subscribe({
+      next: () => {
         this.closeConfirmDelete();
         this.reloadCurrentMonth();
-        },
-        error: (err) => console.error('❌ Error al borrar por título:', err)
+      },
+      error: (err) => console.error('❌ Error al borrar por título:', err)
     });
-    }
-
+  }
 
 }
 
@@ -217,14 +228,4 @@ function toLocalKey(d: Date): string {
   const m = (d.getMonth() + 1).toString().padStart(2, '0');
   const day = d.getDate().toString().padStart(2, '0');
   return `${y}-${m}-${day}`;
-}
-
-function nextStatus(s: Habit['status']): Habit['status'] {
-  switch (s) {
-    case 'undefined': return 'done';
-    case 'done':      return 'partially';
-    case 'partially': return 'not_done';
-    case 'not_done':  return 'undefined';
-    default:          return 'undefined';
-  }
 }

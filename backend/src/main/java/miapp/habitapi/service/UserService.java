@@ -2,9 +2,12 @@ package miapp.habitapi.service;
 
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
 import miapp.habitapi.models.User;
 import miapp.habitapi.repository.UserRepository;
 
+@Service
 public class UserService {
 
     private final UserRepository repo;

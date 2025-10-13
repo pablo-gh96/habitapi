@@ -1,15 +1,14 @@
 package miapp.habitapi.service;
 
-
 import miapp.habitapi.dto.CreateHabit;
 import miapp.habitapi.dto.RepeatType;
 import miapp.habitapi.models.Habit;
-import miapp.habitapi.repository.HabitRepository;
 import miapp.habitapi.models.Status;
+import miapp.habitapi.repository.HabitRepository;
+import miapp.habitapi.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Year;
@@ -22,41 +21,52 @@ import java.util.List;
 public class HabitService {
 
     private final HabitRepository habitRepository;
+    private final UserRepository userRepository;
 
-    public HabitService(HabitRepository habitRepository) {
+    public HabitService(HabitRepository habitRepository, UserRepository userRepository) {
         this.habitRepository = habitRepository;
+        this.userRepository = userRepository;
     }
 
     /**
-     * Devuelve todos los hábitos del mes indicado (por ejemplo octubre 2025).
-     * Si no se pasa ningún parámetro, usa el mes actual.
+     * Devuelve todos los hábitos del mes indicado para un userId.
+     * Si no se pasa year/month, usa el mes actual.
      */
-    public List<Habit> getHabitsForMonth(Integer year, Integer month) {
-        // Si no se indica, usar el año/mes actual
-        YearMonth ym = (year != null && month != null)
-                ? YearMonth.of(year, month)
-                : YearMonth.now();
+    public List<Habit> getHabitsForMonth(Long userId, Integer year, Integer month) {
+        if (userId == null) throw new IllegalArgumentException("userId is required");
 
+        YearMonth ym = (year != null && month != null) ? YearMonth.of(year, month) : YearMonth.now();
         LocalDate start = ym.atDay(1);
         LocalDate end = ym.atEndOfMonth();
 
-        return habitRepository.findByDateBetween(start, end);
+        return habitRepository.findByUserIdAndDateBetweenOrderByTitleAsc(userId, start, end);
     }
-    
+
+
+    /**
+     * Crea hábitos (una vez / diario / semanal / mensual) para el userId incluido en el DTO.
+     * Expande solo dentro del AÑO de la fecha base.
+     */
     @Transactional
     public List<Habit> createHabits(CreateHabit req) {
+        if (req == null) throw new IllegalArgumentException("body is required");
+        if (req.getUserId() == null) throw new IllegalArgumentException("userId is required");
+        if (req.getDate() == null) throw new IllegalArgumentException("date is required");
+
+        var user = userRepository.findById(req.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id " + req.getUserId()));
+
         LocalDate base = req.getDate();
-        if (base == null) throw new IllegalArgumentException("date is required");
-
         List<LocalDate> dates = expandDatesForYear(base, req.getRepeat());
-        List<Habit> toSave = new ArrayList<>(dates.size());
 
+        List<Habit> toSave = new ArrayList<>(dates.size());
         for (LocalDate d : dates) {
             Habit h = new Habit();
             h.setTitle(req.getTitle());
             h.setIcon(req.getIcon());
-            h.setStatus(Status.UNDEFINED);      // estado inicial
+            h.setStatus(Status.UNDEFINED); // estado inicial
             h.setDate(d);
+            h.setUser(user);               // <- asignación de usuario
             toSave.add(h);
         }
         return habitRepository.saveAll(toSave);
@@ -83,11 +93,10 @@ public class HabitService {
                 DayOfWeek targetDow = baseDate.getDayOfWeek();
 
                 LocalDate cursor = LocalDate.of(y, 1, 1);
-                // primera ocurrencia del mismo día de la semana en el año (>= 1 de enero)
                 LocalDate first = cursor.with(TemporalAdjusters.nextOrSame(targetDow));
                 LocalDate end = LocalDate.of(y, 12, 31);
 
-                List<LocalDate> weeks = new ArrayList<>(60); // máx ~53
+                List<LocalDate> weeks = new ArrayList<>(60);
                 for (LocalDate d = first; !d.isAfter(end); d = d.plusWeeks(1)) {
                     weeks.add(d);
                 }
@@ -100,59 +109,73 @@ public class HabitService {
                 List<LocalDate> months = new ArrayList<>(12);
                 for (int m = 1; m <= 12; m++) {
                     YearMonth ym = YearMonth.of(y, m);
-                    int dom = Math.min(dayOfMonth, ym.lengthOfMonth()); // 31→30/28/29 si toca
+                    int dom = Math.min(dayOfMonth, ym.lengthOfMonth());
                     months.add(ym.atDay(dom));
                 }
                 yield months;
             }
         };
     }
-    
+
+    /**
+     * Cicla el estado de un hábito del usuario (UNDEFINED → DONE → PARTIALLY → NOT_DONE → UNDEFINED).
+     */
     @Transactional
-    public Habit toggleStatus(Long id) {
-        Habit habit = habitRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Habit not found with id " + id));
+    public Habit toggleStatus(Long userId, Long habitId) {
+        if (userId == null || habitId == null) {
+            throw new IllegalArgumentException("userId and habitId are required");
+        }
+
+        Habit habit = habitRepository.findByIdAndUserId(habitId, userId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Habit not found with id " + habitId + " for user " + userId));
 
         Status current = habit.getStatus();
-        Status next;
-
-        switch (current) {
-            case UNDEFINED -> next = Status.DONE;
-            case DONE -> next = Status.PARTIALLY;
-            case PARTIALLY -> next = Status.NOT_DONE;
-            case NOT_DONE -> next = Status.UNDEFINED;
-            default -> next = Status.UNDEFINED;
-        }
+        Status next = switch (current) {
+            case UNDEFINED -> Status.DONE;
+            case DONE -> Status.PARTIALLY;
+            case PARTIALLY -> Status.NOT_DONE;
+            case NOT_DONE -> Status.UNDEFINED;
+        };
 
         habit.setStatus(next);
         return habitRepository.save(habit);
     }
-    
+
+    /**
+     * Borra un hábito por id, asegurando pertenencia a userId.
+     */
     @Transactional
-    public void deleteHabit(Long id) {
-        if (!habitRepository.existsById(id)) {
-            throw new IllegalArgumentException("Habit not found with id " + id);
+    public void deleteHabit(Long userId, Long habitId) {
+        if (userId == null || habitId == null) {
+            throw new IllegalArgumentException("userId and habitId are required");
         }
-        habitRepository.deleteById(id);
+        if (!habitRepository.existsByIdAndUserId(habitId, userId)) {
+            throw new IllegalArgumentException(
+                    "Habit not found with id " + habitId + " for user " + userId);
+        }
+        habitRepository.deleteById(habitId);
     }
 
-
+    /**
+     * Borra todas las ocurrencias por título para un userId.
+     * Devuelve el número de filas afectadas.
+     */
     @Transactional
-    public long deleteByTitle(String title) {
+    public long deleteByTitle(Long userId, String title) {
+        if (userId == null) throw new IllegalArgumentException("userId is required");
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("title is required");
         }
         String t = title.trim();
 
-        // 1) obtener ids a borrar
-        var ids = habitRepository.findIdsByTitle(t);
+        // Opción A: obtener ids y borrar en batch (mantiene tu patrón original)
+        var ids = habitRepository.findIdsByUserIdAndTitle(userId, t);
         if (ids.isEmpty()) return 0L;
-
-        // 2) borrar en batch
         habitRepository.deleteAllByIdInBatch(ids);
-
-        // 3) devolver cuántos eran
         return ids.size();
+
+        // Opción B: una sola sentencia:
+        // return habitRepository.deleteByUserIdAndTitle(userId, t);
     }
 }
-

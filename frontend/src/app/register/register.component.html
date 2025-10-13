@@ -66,10 +66,10 @@
           <a routerLink="/login" class="text-sm text-gray-600 hover:underline">Ya tengo cuenta</a>
           <button
             type="submit"
-            [disabled]="form.invalid || loading()"
+            [disabled]="form.invalid"
             class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 active:scale-[0.98]"
           >
-            {{ loading() ? 'Creando…' : 'Crear cuenta' }}
+            Crear cuenta
           </button>
         </div>
       </form>

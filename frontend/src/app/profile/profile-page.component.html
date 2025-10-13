@@ -34,33 +34,24 @@
         <button
           (click)="prevMonth()"
           class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]"
+          (click)="prevMonth()"
         >
           ← Anterior
         </button>
-        <div
-          class="text-lg font-medium capitalize tracking-tight text-gray-900"
-        >
+        <div class="text-lg font-medium capitalize tracking-tight text-gray-900">
           {{ monthLabel() }}
         </div>
         <button
-          (click)="nextMonth()"
           class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]"
+          (click)="nextMonth()"
         >
           Siguiente →
         </button>
       </div>
 
       <!-- Días de la semana -->
-      <div
-        class="grid grid-cols-7 text-center text-xs font-medium text-gray-500"
-      >
-        <div>L</div>
-        <div>M</div>
-        <div>X</div>
-        <div>J</div>
-        <div>V</div>
-        <div>S</div>
-        <div>D</div>
+      <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-500">
+        <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
       </div>
 
       <!-- Celdas del calendario -->
@@ -70,8 +61,7 @@
             <div
               class="relative aspect-square rounded-xl p-2 text-sm transition ring-1"
               [ngClass]="{
-                'bg-white text-gray-900 ring-gray-200':
-                  day.inCurrentMonth && !day.isToday,
+                'bg-white text-gray-900 ring-gray-200': day.inCurrentMonth && !day.isToday,
                 'bg-gray-50 text-gray-400 ring-gray-200': !day.inCurrentMonth,
                 'bg-white text-gray-900 ring-2 ring-gray-900': day.isToday
               }"
@@ -79,7 +69,7 @@
             >
               <!-- Número del día -->
               <div class="mb-1">
-                <span class="font-medium">{{ day.date | date : "d" }}</span>
+                <span class="font-medium">{{ day.date | date : 'd' }}</span>
               </div>
 
               <!-- Hábitos del día -->
@@ -115,15 +105,10 @@
   <!-- Modal para crear hábito -->
   <div *ngIf="showCreateModal()" class="fixed inset-0 z-50">
     <!-- Fondo oscuro -->
-    <div
-      class="absolute inset-0 bg-black/40"
-      (click)="closeCreateModal()"
-    ></div>
+    <div class="absolute inset-0 bg-black/40" (click)="closeCreateModal()"></div>
 
     <!-- Contenedor del modal -->
-    <div
-      class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4"
-    >
+    <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
       <form
         [formGroup]="createForm"
         (ngSubmit)="submitCreate()"
@@ -131,31 +116,23 @@
       >
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900">Nuevo hábito</h2>
-          <button
-            type="button"
-            (click)="closeCreateModal()"
-            aria-label="Cerrar"
-            class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50"
-          >
+          <button type="button" (click)="closeCreateModal()" aria-label="Cerrar"
+                  class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50">
             &times;
           </button>
         </div>
 
         <!-- Campo: título -->
-        <label class="mb-2 block text-sm font-medium text-gray-700"
-          >Título</label
-        >
+        <label class="mb-2 block text-sm font-medium text-gray-700">Título</label>
         <input
-          formControlName="name"
+          formControlName="title"
           type="text"
           placeholder="Ej. Hacer ejercicio"
           class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
         />
 
         <!-- Campo: icono -->
-        <label class="mb-2 block text-sm font-medium text-gray-700"
-          >Icono</label
-        >
+        <label class="mb-2 block text-sm font-medium text-gray-700">Icono</label>
         <input
           formControlName="icon"
           type="text"
@@ -164,9 +141,7 @@
         />
 
         <!-- Campo: fecha -->
-        <label class="mb-2 block text-sm font-medium text-gray-700"
-          >Fecha</label
-        >
+        <label class="mb-2 block text-sm font-medium text-gray-700">Fecha</label>
         <input
           formControlName="date"
           type="date"
@@ -174,9 +149,7 @@
         />
 
         <!-- Campo: repetición -->
-        <label class="mb-2 block text-sm font-medium text-gray-700"
-          >Repetición</label
-        >
+        <label class="mb-2 block text-sm font-medium text-gray-700">Repetición</label>
         <select
           formControlName="repeat"
           class="mb-5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
@@ -189,18 +162,12 @@
 
         <!-- Botones de acción -->
         <div class="flex justify-end gap-2">
-          <button
-            type="button"
-            (click)="closeCreateModal()"
-            class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50"
-          >
+          <button type="button" (click)="closeCreateModal()"
+                  class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
             Cancelar
           </button>
-          <button
-            type="submit"
-            [disabled]="createForm.invalid"
-            class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-          >
+          <button type="submit" [disabled]="createForm.invalid"
+                  class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
             Crear
           </button>
         </div>
@@ -214,92 +181,61 @@
     <div class="absolute inset-0 bg-black/40" (click)="closeDayModal()"></div>
 
     <!-- Tarjeta -->
-    <div
-      class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4"
-    >
-      <div
-        class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200"
-      >
+    <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
+      <div class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900">
-            Tareas — {{ selectedDay() | date : "fullDate" }}
+            Tareas — {{ selectedDay() | date : 'fullDate' }}
           </h2>
-          <button
-            type="button"
-            (click)="closeDayModal()"
-            aria-label="Cerrar"
-            class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50"
-          >
+          <button type="button" (click)="closeDayModal()" aria-label="Cerrar"
+                  class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50">
             &times;
           </button>
         </div>
 
-        <div
-          *ngIf="selectedDayHabits().length === 0"
-          class="text-sm text-gray-500"
-        >
+        <div *ngIf="selectedDayHabits().length === 0" class="text-sm text-gray-500">
           No hay tareas para este día.
         </div>
 
         <ul class="space-y-2" *ngIf="selectedDayHabits().length > 0">
-          <li
-            *ngFor="let h of selectedDayHabits()"
-            class="flex items-center justify-between rounded-lg border border-gray-200 p-2"
-          >
+          <li *ngFor="let h of selectedDayHabits()"
+              class="flex items-center justify-between rounded-lg border border-gray-200 p-2">
             <div class="flex items-center gap-2">
               <span
                 class="inline-flex h-7 w-7 items-center justify-center rounded-md text-sm ring-1"
                 [ngClass]="statusClasses(h.status)"
-                >{{ h.icon }}</span
               >
+                {{ h.icon }}
+              </span>
               <div class="text-sm text-gray-900">{{ h.title }}</div>
             </div>
-            <!-- opcional: permitir eliminar el hábito -->
-            <button
-              type="button"
-              class="rounded-md px-2 py-1 text-xs ring-1 ring-gray-300 hover:bg-gray-50"
-              (click)="openConfirmDelete(h)"
-            >
+            <button type="button" class="rounded-md px-2 py-1 text-xs ring-1 ring-gray-300 hover:bg-gray-50"
+                    (click)="openConfirmDelete(h)">
               ❌
             </button>
           </li>
         </ul>
 
         <div class="mt-4 flex justify-end">
-          <button
-            type="button"
-            (click)="closeDayModal()"
-            class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50"
-          >
+          <button type="button" (click)="closeDayModal()"
+                  class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
             Cerrar
           </button>
         </div>
       </div>
     </div>
   </div>
+
   <!-- Modal de confirmación de borrado -->
   <div *ngIf="showConfirmModal()" class="fixed inset-0 z-50">
-    <!-- Fondo -->
-    <div
-      class="absolute inset-0 bg-black/40"
-      (click)="closeConfirmDelete()"
-    ></div>
+    <div class="absolute inset-0 bg-black/40" (click)="closeConfirmDelete()"></div>
 
-    <!-- Tarjeta -->
-    <div
-      class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4"
-    >
-      <div
-        class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200"
-      >
+    <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
+      <div class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900">Eliminar hábito</h2>
-          <button
-            type="button"
-            (click)="closeConfirmDelete()"
-            aria-label="Cerrar"
-            class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50"
-          >
+          <button type="button" (click)="closeConfirmDelete()" aria-label="Cerrar"
+                  class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50">
             &times;
           </button>
         </div>
@@ -307,34 +243,23 @@
         <p class="mb-4 text-sm text-gray-700">
           ¿Quieres eliminar
           <span class="font-medium">solo esta ocurrencia</span> o
-          <span class="font-medium"
-            >todas las ocurrencias con el mismo título</span
-          >?
+          <span class="font-medium">todas las ocurrencias con el mismo título</span>?
         </p>
 
         <div class="grid gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50"
-            (click)="confirmDeleteSingle()"
-          >
+          <button type="button" class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50"
+                  (click)="confirmDeleteSingle()">
             Solo esta
           </button>
-          <button
-            type="button"
-            class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            (click)="confirmDeleteAll()"
-          >
+          <button type="button" class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+                  (click)="confirmDeleteAll()">
             Todas las ocurrencias
           </button>
         </div>
 
         <div class="mt-4 flex justify-end">
-          <button
-            type="button"
-            (click)="closeConfirmDelete()"
-            class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50"
-          >
+          <button type="button" (click)="closeConfirmDelete()"
+                  class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
             Cancelar
           </button>
         </div>

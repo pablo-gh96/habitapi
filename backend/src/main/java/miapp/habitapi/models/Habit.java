@@ -1,7 +1,9 @@
 package miapp.habitapi.models;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -12,14 +14,28 @@ public class Habit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Título del hábito
+    @Column(nullable = false, length = 120)
     private String title;
 
+    // Emoji o nombre corto (máx. unos pocos chars)
+    @Column(nullable = false, length = 16)
     private String icon;
 
+    // Estado (usa tu enum Status: UNDEFINED, DONE, PARTIALLY, NOT_DONE)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    @Column(nullable = false, length = 20)
+    private Status status = Status.UNDEFINED;
 
+    // Fecha concreta de la ocurrencia
+    @Column(nullable = false)
     private LocalDate date;
+
+    // Muchos hábitos pertenecen a un usuario
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore // evita LazyInitializationException al serializar
+    private User user;
 
     // --- Constructores ---
     public Habit() {}
@@ -32,43 +48,29 @@ public class Habit {
     }
 
     // --- Getters y Setters ---
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getTitle() {
-        return title;
-    }
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 
-    public String getIcon() {
-        return icon;
-    }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
 
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
+    // --- Exponer userId en JSON (opcional y útil para el front) ---
+    @Transient
+    @JsonProperty("userId")
+    public Long getUserIdForJson() {
+        // Leer el id del proxy es seguro sin inicializar toda la entidad
+        return (user != null) ? user.getId() : null;
     }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Habit } from '../models/habit';
-import { CreateHabit } from '../dto/CreateHabit';
+import { CreateHabit } from '../dto/createHabit';
 
 @Injectable({ providedIn: 'root' })
 export class HabitService {
@@ -10,28 +10,37 @@ export class HabitService {
 
   constructor(private http: HttpClient) {}
 
-  /** Devuelve todos los hábitos del mes indicado */
-  getHabits(year: number, month: number): Observable<Habit[]> {
-    const params = new HttpParams()
-      .set('year', String(year))
-      .set('month', String(month));
-
+  /** Habitos de un mes por usuario */
+  getHabits(userId: number, year?: number, month?: number): Observable<Habit[]> {
+    let params = new HttpParams().set('userId', String(userId));
+    if (year != null)  params = params.set('year', String(year));
+    if (month != null) params = params.set('month', String(month));
     return this.http.get<Habit[]>(this.baseUrl, { params });
   }
 
-    create(habit: CreateHabit): Observable<Habit[]> {
+  /** Crear 1..n hábitos (según repeat) para el usuario (CreateHabit debe llevar userId) */
+  create(habit: CreateHabit): Observable<Habit[]> {
+    // habit.userId debe venir informado desde el componente
     return this.http.post<Habit[]>(this.baseUrl, habit);
   }
 
-    updateStatus(id: number): Observable<Habit> {
-    return this.http.patch<Habit>(`${this.baseUrl}/${id}/status`, {});
+  /** Toggle de estado asegurando pertenencia a userId */
+  updateStatus(userId: number, id: number): Observable<Habit> {
+    const params = new HttpParams().set('userId', String(userId));
+    return this.http.patch<Habit>(`${this.baseUrl}/${id}/status`, {}, { params });
   }
 
-    delete(id: number) {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
-    }
+  /** Borrado de una ocurrencia por id y userId */
+  delete(userId: number, id: number): Observable<void> {
+    const params = new HttpParams().set('userId', String(userId));
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { params });
+  }
 
-    deleteByTitle(title: string) {
-    return this.http.delete<{ deleted: number }>(`${this.baseUrl}/by-title`, { params: { title } });
-    }
+  /** Borrado masivo por título para un usuario */
+  deleteByTitle(userId: number, title: string): Observable<{ deleted: number }> {
+    const params = new HttpParams()
+      .set('userId', String(userId))
+      .set('title', title);
+    return this.http.delete<{ deleted: number }>(`${this.baseUrl}/by-title`, { params });
+  }
 }

@@ -1,30 +1,33 @@
 package miapp.habitapi.repository;
 
-
 import miapp.habitapi.models.Habit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
-@Repository
 public interface HabitRepository extends JpaRepository<Habit, Long> {
 
-    // Buscar todos los hábitos de un día concreto
-    List<Habit> findByDate(LocalDate date);
+    // Listado por usuario y rango de fechas (mes, semana, etc.)
+    List<Habit> findByUserIdAndDateBetween(Long userId, LocalDate start, LocalDate end);
 
-    // Buscar por nombre (útil si un hábito se repite)
-    List<Habit> findByTitle(String title);
+    // Un hábito por id asegurando pertenencia
+    Optional<Habit> findByIdAndUserId(Long id, Long userId);
 
-    // Buscar por rango de fechas (por ejemplo el mes actual)
-    List<Habit> findByDateBetween(LocalDate start, LocalDate end);
+    // Existencia asegurando pertenencia
+    boolean existsByIdAndUserId(Long id, Long userId);
+
+    // IDs por título y usuario (para borrado masivo)
+    @Query("select h.id from Habit h where h.user.id = :userId and h.title = :title")
+    List<Long> findIdsByUserIdAndTitle(Long userId, String title);
+
+    // (Alternativa directa si prefieres no hacer findIds + batch)
+    long deleteByUserIdAndTitle(Long userId, String title);
     
-    long countByTitle(String title);
+    List<Habit> findByUserIdAndDateBetweenOrderByTitleAsc(
+    	    Long userId, LocalDate start, LocalDate end
+    	);
 
-    @Query("select h.id from Habit h where h.title = :title")
-    List<Long> findIdsByTitle(@Param("title") String title);
 }
-

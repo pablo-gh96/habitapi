@@ -10,8 +10,8 @@ export interface Credentials {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  // Ajusta si usas environment: `${environment.api}/auth`
-  private baseUrl = '/auth';
+  
+  private baseUrl = 'http://localhost:8080/auth';
 
   register(body: Credentials): Observable<any> {
     return this.http.post(`${this.baseUrl}/register`, body);
