@@ -34,7 +34,6 @@
         <button
           (click)="prevMonth()"
           class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]"
-          (click)="prevMonth()"
         >
           ← Anterior
         </button>
@@ -42,8 +41,8 @@
           {{ monthLabel() }}
         </div>
         <button
-          class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]"
           (click)="nextMonth()"
+          class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]"
         >
           Siguiente →
         </button>
@@ -86,15 +85,28 @@
                 </ng-container>
               </div>
 
-              <!-- Botón "+" abajo a la derecha -->
-              <button
-                type="button"
-                (click)="openDayModal(day.date)"
-                class="absolute bottom-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100 active:scale-[0.98]"
-                aria-label="Ver tareas del día"
-              >
-                +
-              </button>
+              <!-- Botones abajo a la derecha: 💬 comentarios + tareas -->
+              <div class="absolute bottom-1 right-1 flex gap-1">
+                <button
+                  type="button"
+                  (click)="openCommentsModal(day.date)"
+                  class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100 active:scale-[0.98]"
+                  aria-label="Ver comentarios del día"
+                  title="Comentarios del día"
+                >
+                  💬
+                </button>
+
+                <button
+                  type="button"
+                  (click)="openDayModal(day.date)"
+                  class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100 active:scale-[0.98]"
+                  aria-label="Ver tareas del día"
+                  title="Tareas del día"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </ng-container>
         </ng-container>
@@ -104,10 +116,7 @@
 
   <!-- Modal para crear hábito -->
   <div *ngIf="showCreateModal()" class="fixed inset-0 z-50">
-    <!-- Fondo oscuro -->
     <div class="absolute inset-0 bg-black/40" (click)="closeCreateModal()"></div>
-
-    <!-- Contenedor del modal -->
     <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
       <form
         [formGroup]="createForm"
@@ -122,7 +131,6 @@
           </button>
         </div>
 
-        <!-- Campo: título -->
         <label class="mb-2 block text-sm font-medium text-gray-700">Título</label>
         <input
           formControlName="title"
@@ -131,7 +139,6 @@
           class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
         />
 
-        <!-- Campo: icono -->
         <label class="mb-2 block text-sm font-medium text-gray-700">Icono</label>
         <input
           formControlName="icon"
@@ -140,7 +147,6 @@
           class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
         />
 
-        <!-- Campo: fecha -->
         <label class="mb-2 block text-sm font-medium text-gray-700">Fecha</label>
         <input
           formControlName="date"
@@ -148,7 +154,6 @@
           class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
         />
 
-        <!-- Campo: repetición -->
         <label class="mb-2 block text-sm font-medium text-gray-700">Repetición</label>
         <select
           formControlName="repeat"
@@ -160,7 +165,6 @@
           <option value="monthly">Mensual</option>
         </select>
 
-        <!-- Botones de acción -->
         <div class="flex justify-end gap-2">
           <button type="button" (click)="closeCreateModal()"
                   class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
@@ -177,10 +181,7 @@
 
   <!-- Modal: Tareas del día -->
   <div *ngIf="showDayModal()" class="fixed inset-0 z-50">
-    <!-- Fondo -->
     <div class="absolute inset-0 bg-black/40" (click)="closeDayModal()"></div>
-
-    <!-- Tarjeta -->
     <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
       <div class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200">
         <div class="mb-4 flex items-center justify-between">
@@ -209,8 +210,11 @@
               </span>
               <div class="text-sm text-gray-900">{{ h.title }}</div>
             </div>
-            <button type="button" class="rounded-md px-2 py-1 text-xs ring-1 ring-gray-300 hover:bg-gray-50"
-                    (click)="openConfirmDelete(h)">
+            <button
+              type="button"
+              class="rounded-md px-2 py-1 text-xs ring-1 ring-gray-300 hover:bg-gray-50"
+              (click)="openConfirmDelete(h)"
+            >
               ❌
             </button>
           </li>
@@ -229,7 +233,6 @@
   <!-- Modal de confirmación de borrado -->
   <div *ngIf="showConfirmModal()" class="fixed inset-0 z-50">
     <div class="absolute inset-0 bg-black/40" (click)="closeConfirmDelete()"></div>
-
     <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
       <div class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200">
         <div class="mb-4 flex items-center justify-between">
@@ -241,8 +244,7 @@
         </div>
 
         <p class="mb-4 text-sm text-gray-700">
-          ¿Quieres eliminar
-          <span class="font-medium">solo esta ocurrencia</span> o
+          ¿Quieres eliminar <span class="font-medium">solo esta ocurrencia</span> o
           <span class="font-medium">todas las ocurrencias con el mismo título</span>?
         </p>
 
@@ -261,6 +263,82 @@
           <button type="button" (click)="closeConfirmDelete()"
                   class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
             Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Comentarios del día (Reactive Forms) -->
+  <div *ngIf="showCommentsModal()" class="fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/40" (click)="closeCommentsModal()"></div>
+
+    <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
+      <div class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900">
+            Comentarios — {{ selectedDay() | date : 'fullDate' }}
+          </h2>
+          <button
+            type="button"
+            (click)="closeCommentsModal()"
+            aria-label="Cerrar"
+            class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div *ngIf="commentsLoading()" class="text-sm text-gray-500">Cargando…</div>
+
+        <div *ngIf="!commentsLoading() && comments().length === 0" class="text-sm text-gray-500">
+          No hay comentarios.
+        </div>
+
+        <ul *ngIf="!commentsLoading() && comments().length > 0" class="space-y-2 mb-4">
+          <li *ngFor="let c of comments()" class="rounded-lg border border-gray-200 p-2">
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-gray-900">{{ c.message }}</div>
+              <div class="text-xs text-gray-500">{{ c.createdAt | date:'HH:mm:ss' }}</div>
+            </div>
+            <div class="mt-1 text-xs text-gray-500">
+              de #{{ c.fromUserId }} → #{{ c.toUserId }}
+            </div>
+          </li>
+        </ul>
+
+        <!-- Form reactivo para nuevo comentario -->
+        <form
+          [formGroup]="commentForm"
+          (ngSubmit)="sendComment()"
+          class="mt-2 rounded-xl border border-gray-200 p-2"
+        >
+          <label class="mb-1 block text-xs font-medium text-gray-600">Nuevo comentario</label>
+          <textarea
+            formControlName="message"
+            rows="2"
+            placeholder="Escribe un mensaje y pulsa Enter…"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+            (keydown.enter)="sendComment(); $event.preventDefault()"
+          ></textarea>
+          <div class="mt-2 flex justify-end">
+            <button
+              type="submit"
+              [disabled]="commentForm.invalid || sendingComment()"
+              class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 active:scale-[0.98]"
+            >
+              {{ sendingComment() ? 'Enviando…' : 'Enviar' }}
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-4 flex justify-end">
+          <button
+            type="button"
+            (click)="closeCommentsModal()"
+            class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50"
+          >
+            Cerrar
           </button>
         </div>
       </div>

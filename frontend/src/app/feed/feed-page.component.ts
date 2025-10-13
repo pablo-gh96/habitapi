@@ -1,9 +1,14 @@
 // src/app/feed/feed-page.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PublicCalendarComponent } from './public-calendar.component';
+import { UsersService, UserSummary } from '../services/user.services';
+import { from } from 'rxjs';
 
 type UserView = { id: number; name: string; avatarUrl: string };
+
+// TODO: sustituir por el id real del usuario autenticado
+const MY_ID = 1;
 
 @Component({
   selector: 'app-feed-page',
@@ -27,10 +32,24 @@ type UserView = { id: number; name: string; avatarUrl: string };
   </div>
   `
 })
-export class FeedPageComponent {
-  users: UserView[] = [
-    { id: 1, name: 'Pablo',  avatarUrl: 'https://api.dicebear.com/9.x/initials/svg?seed=Pablo' },
-    { id: 2, name: 'María',  avatarUrl: 'https://api.dicebear.com/9.x/initials/svg?seed=Maria' },
-    { id: 3, name: 'Carlos', avatarUrl: 'https://api.dicebear.com/9.x/initials/svg?seed=Carlos' },
-  ];
+export class FeedPageComponent implements OnInit {
+  private usersSvc = inject(UsersService);
+
+  users: UserView[] = [];
+
+  ngOnInit(): void {
+    this.usersSvc.getOthers(MY_ID).subscribe({
+      next: (list: UserSummary[]) => {
+        this.users = list.map(u => ({
+          id: u.id,
+          name: u.name,
+          avatarUrl: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(u.name)}`
+        }));
+      },
+      error: (err) => {
+        console.error('❌ Error cargando usuarios:', err);
+        this.users = [];
+      }
+    });
+  }
 }

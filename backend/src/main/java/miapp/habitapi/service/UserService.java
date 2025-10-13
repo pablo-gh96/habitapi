@@ -1,9 +1,12 @@
 package miapp.habitapi.service;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import miapp.habitapi.dto.UserSummary;
 import miapp.habitapi.models.User;
 import miapp.habitapi.repository.UserRepository;
 
@@ -33,5 +36,16 @@ public class UserService {
     public Optional<User> login(User user) {
         return repo.findByName(user.getName())
                 .filter(u -> u.getPassword().equals(user.getPassword()));
+    }
+    
+    public List<UserSummary> listOthers(Long myId) {
+        if (myId == null) throw new IllegalArgumentException("myId is required");
+        return repo.findAllSummariesExcluding(myId);
+    }
+
+    // Variante paginada (por si la quieres)
+    public List<UserSummary> listOthers(Long myId, int page, int size) {
+        if (myId == null) throw new IllegalArgumentException("myId is required");
+        return repo.findAllSummariesExcluding(myId, PageRequest.of(page, size)).getContent();
     }
 }

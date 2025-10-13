@@ -1,10 +1,17 @@
-import { Component, computed, effect, signal, OnInit, Input } from '@angular/core';
+// src/app/profile-page/profile-page.component.ts
+import { Component, computed, effect, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Habit } from '../models/habit';
 import { HabitService } from '../services/habit.services';
+import { CommentService} from '../services/comment.service';
+import { Comment} from '../models/comment';
+import { CreateComment } from '../dto/CreateComment';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
+
+// TODO: sustituir por el id real cuando tengas login
+const USER_ID = 1;
 
 @Component({
   selector: 'app-profile-page',
@@ -14,18 +21,17 @@ type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 })
 export class ProfilePageComponent implements OnInit {
 
-  // 👇 Parametrizable desde fuera
-  @Input() userId!: number;
-  @Input() userName: string = 'Usuario';
-  @Input() avatarUrl: string = 'https://api.dicebear.com/9.x/initials/svg?seed=User';
-  @Input() readOnly = false; // en feed lo usaremos en solo-lectura
+  readonly userName = 'Pablo';
+  readonly avatarUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=Pablo';
 
+  // --- Calendario base ---
   readonly baseDate = signal(startOfMonth(new Date()));
   readonly monthLabel = computed(() =>
     this.baseDate().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
   );
   readonly weeks = computed<DayCell[][]>(() => buildMonthMatrix(this.baseDate()));
 
+  // --- Hábitos agrupados por fecha (yyyy-MM-dd) ---
   private readonly habitsByDate = signal<Map<string, Habit[]>>(new Map());
   getHabitsFor(day: Date): Habit[] {
     const key = toLocalKey(day);
@@ -35,32 +41,62 @@ export class ProfilePageComponent implements OnInit {
   prevMonth() { this.baseDate.set(updateMonth(this.baseDate(), -1)); }
   nextMonth() { this.baseDate.set(updateMonth(this.baseDate(), +1)); }
 
+  // --- Modal crear hábito ---
   readonly showCreateModal = signal(false);
   createForm!: FormGroup;
 
-  constructor(private habitService: HabitService, private fb: FormBuilder) {}
+  // --- Modal tareas del día ---
+  readonly showDayModal = signal(false);
+  readonly selectedDay = signal<Date | null>(null);
+  readonly selectedDayHabits = computed(() => {
+    const d = this.selectedDay();
+    return d ? this.getHabitsFor(d) : [];
+  });
+
+  // --- Modales de borrado ---
+  readonly showConfirmModal = signal(false);
+  private habitToDelete: Habit | null = null;
+
+  // --- Comentarios del día ---
+  readonly showCommentsModal = signal(false);
+  readonly comments = signal<Comment[]>([]);
+  readonly commentsLoading = signal(false);
+  readonly sendingComment = signal(false);
+  commentForm!: FormGroup;
+
+  constructor(
+    private habitService: HabitService,
+    private fb: FormBuilder,
+    private commentService: CommentService
+  ) {}
 
   ngOnInit(): void {
     const today = toLocalKey(new Date());
+
+    // Form crear hábito
     this.createForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(80)]],
       icon: ['', [Validators.required, Validators.maxLength(8)]],
       date: [today, [Validators.required]],
       repeat: ['once', Validators.required]
     });
+
+    // Form nuevo comentario (reactivo)
+    this.commentForm = this.fb.group({
+      message: ['', [Validators.required, Validators.maxLength(1000)]]
+    });
   }
 
+  // Efecto: cuando cambie el mes base, recarga
   private _loadEff = effect(() => {
-    // cuando cambie el mes o el userId, recarga
     const current = this.baseDate();
-    if (!this.userId) return;
     const year = current.getFullYear();
     const month = current.getMonth() + 1;
     this.loadMonth(year, month);
   });
 
   private loadMonth(year: number, month: number): void {
-    this.habitService.getHabits(this.userId, year, month).subscribe({
+    this.habitService.getHabits(USER_ID, year, month).subscribe({
       next: (items) => {
         const map = new Map<string, Habit[]>();
         for (const raw of items) {
@@ -84,8 +120,8 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
+  // --- Crear hábito ---
   openCreateModal() {
-    if (this.readOnly) return;
     const today = toLocalKey(new Date());
     this.createForm.reset({ title: '', icon: '', date: today, repeat: 'once' });
     this.showCreateModal.set(true);
@@ -93,24 +129,26 @@ export class ProfilePageComponent implements OnInit {
   closeCreateModal() { this.showCreateModal.set(false); }
 
   submitCreate() {
-    if (this.readOnly || this.createForm.invalid) return;
+    if (this.createForm.invalid) return;
+
     const v = this.createForm.getRawValue();
     const payload = {
       title: v.title,
       icon: v.icon,
-      date: v.date,
-      repeat: (v.repeat as string).toUpperCase() as any,
-      userId: this.userId
+      date: v.date, // 'YYYY-MM-DD'
+      repeat: (v.repeat as string).toUpperCase() as any, // ONCE|DAILY|WEEKLY|MONTHLY
+      userId: USER_ID
     };
+
     this.habitService.create(payload as any).subscribe({
       next: () => { this.reloadCurrentMonth(); this.closeCreateModal(); },
       error: (err) => { console.error('❌ Error al crear hábito:', err); alert('Error al crear el hábito'); }
     });
   }
 
+  // --- Interacción con hábitos ---
   onHabitClick(h: Habit) {
-    if (this.readOnly) return;
-    this.habitService.updateStatus(this.userId, h.id).subscribe({
+    this.habitService.updateStatus(USER_ID, h.id).subscribe({
       next: () => this.reloadCurrentMonth(),
       error: (err) => console.error('❌ Error al cambiar estado:', err)
     });
@@ -125,20 +163,34 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
-  readonly showDayModal = signal(false);
-  readonly selectedDay = signal<Date | null>(null);
-  readonly selectedDayHabits = computed(() => {
-    const d = this.selectedDay();
-    return d ? this.getHabitsFor(d) : [];
-  });
+  // --- Modal tareas del día ---
   openDayModal(d: Date) { this.selectedDay.set(d); this.showDayModal.set(true); }
   closeDayModal() { this.showDayModal.set(false); }
 
+  // --- Borrado de hábitos ---
   onDeleteHabit(h: Habit) {
-    if (this.readOnly) return;
-    this.habitService.delete(this.userId, h.id).subscribe({
+    this.habitService.delete(USER_ID, h.id).subscribe({
       next: () => this.reloadCurrentMonth(),
       error: (err) => console.error('❌ Error al borrar hábito:', err)
+    });
+  }
+
+  openConfirmDelete(h: Habit) { this.habitToDelete = h; this.showConfirmModal.set(true); }
+  closeConfirmDelete() { this.showConfirmModal.set(false); this.habitToDelete = null; }
+
+  confirmDeleteSingle() {
+    if (!this.habitToDelete) return;
+    this.habitService.delete(USER_ID, this.habitToDelete.id).subscribe({
+      next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
+      error: (err) => console.error('❌ Error al borrar por id:', err)
+    });
+  }
+  confirmDeleteAll() {
+    if (!this.habitToDelete) return;
+    const title = this.habitToDelete.title;
+    this.habitService.deleteByTitle(USER_ID, title).subscribe({
+      next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
+      error: (err) => console.error('❌ Error al borrar por título:', err)
     });
   }
 
@@ -147,34 +199,61 @@ export class ProfilePageComponent implements OnInit {
     this.loadMonth(d.getFullYear(), d.getMonth() + 1);
   }
 
-  readonly showConfirmModal = signal(false);
-  private habitToDelete: Habit | null = null;
+  // --- Comentarios del día ---
+  // abrir modal comentarios
+  openCommentsModal(d: Date) {
+    this.selectedDay.set(d);
+    this.showCommentsModal.set(true);
 
-  openConfirmDelete(h: Habit) {
-    if (this.readOnly) return;
-    this.habitToDelete = h;
-    this.showConfirmModal.set(true);
-  }
-  closeConfirmDelete() { this.showConfirmModal.set(false); this.habitToDelete = null; }
+    const dayISO = toLocalKey(d);
+    this.commentsLoading.set(true);
+    this.commentService.getForDay(USER_ID, dayISO).subscribe({
+      next: (list) => {
+        // backend ya devuelve ASC por createdAt; no hace falta ordenar aquí
+        this.comments.set(list);
+      },
+      error: (err) => { console.error('❌ Error cargando comentarios:', err); this.comments.set([]); },
+      complete: () => this.commentsLoading.set(false)
+    });
 
-  confirmDeleteSingle() {
-    if (!this.habitToDelete || this.readOnly) return;
-    this.habitService.delete(this.userId, this.habitToDelete.id).subscribe({
-      next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
-      error: (err) => console.error('❌ Error al borrar por id:', err)
-    });
+    this.commentForm.reset({ message: '' });
   }
-  confirmDeleteAll() {
-    if (!this.habitToDelete || this.readOnly) return;
-    const title = this.habitToDelete.title;
-    this.habitService.deleteByTitle(this.userId, title).subscribe({
-      next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
-      error: (err) => console.error('❌ Error al borrar por título:', err)
-    });
+
+  closeCommentsModal() {
+    this.showCommentsModal.set(false);
+    this.comments.set([]);
+    this.commentForm.reset({ message: '' });
   }
+
+  sendComment() {
+  const msg = this.commentForm.get('message')?.value?.trim();
+  const sel = this.selectedDay();
+  if (!msg || !sel || this.sendingComment()) return;
+
+  const body: CreateComment = {
+    message: msg,
+    fromUserId: USER_ID,
+    toUserId: USER_ID,         // si luego eliges destinatario, cámbialo aquí
+    day: toLocalKey(sel)       // 'YYYY-MM-DD'
+  };
+
+  this.sendingComment.set(true);
+  this.commentService.create(body).subscribe({
+    next: (saved) => {
+      // Mantener orden ASC por createdAt -> añadimos al FINAL
+      this.comments.set([...this.comments(), saved]);
+      this.commentForm.reset({ message: '' });
+    },
+    error: (err) => {
+      console.error('❌ Error creando comentario:', err);
+      alert('No se pudo enviar el comentario');
+    },
+    complete: () => this.sendingComment.set(false)
+  });
+}
 }
 
-/* ===== Helpers (igual que tenías) ===== */
+/* ===== Helpers ===== */
 function startOfMonth(d: Date): Date { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function updateMonth(d: Date, delta: number): Date { const nd = new Date(d); nd.setMonth(nd.getMonth() + delta); return startOfMonth(nd); }
 function startOfWeekMonday(d: Date): Date { const day = (d.getDay() + 6) % 7; const sd = new Date(d); sd.setDate(d.getDate() - day); sd.setHours(0,0,0,0); return sd; }

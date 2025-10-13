@@ -1,48 +1,39 @@
 package miapp.habitapi.controllers;
 
-
-import miapp.habitapi.models.User;
+import miapp.habitapi.dto.UserSummary;
 import miapp.habitapi.service.UserService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
-@CrossOrigin(origins = "*") // Permite peticiones desde el frontend
+@RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
 public class UserController {
 
-    private final UserService userService;
+    private final UserService service;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserService service) {
+        this.service = service;
     }
 
-    // 🧾 Crear cuenta
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    // GET /api/users/others?myId=1
+    @GetMapping("/others")
+    public ResponseEntity<?> others(
+            @RequestParam Long myId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
         try {
-        	userService.createAccount(user);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Usuario creado correctamente"
-            ));
+            if (page != null && size != null) {
+                List<UserSummary> data = service.listOthers(myId, page, size);
+                return ResponseEntity.ok(data);
+            }
+            return ResponseEntity.ok(service.listOthers(myId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }
     }
-
-    // 🔐 Login simple
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
-        return userService.login(user)
-                .map(u -> ResponseEntity.ok(Map.of(
-                        "user", u.getName(),
-                        "id", u.getId()
-                )))
-                .orElseGet(() ->
-                        ResponseEntity.status(401).body(Map.of("error", "Credenciales inválidas"))
-                );
-    }
 }
-
