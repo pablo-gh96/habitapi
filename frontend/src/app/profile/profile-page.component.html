@@ -302,7 +302,7 @@
               <div class="text-xs text-gray-500">{{ c.createdAt | date:'HH:mm:ss' }}</div>
             </div>
             <div class="mt-1 text-xs text-gray-500">
-              de #{{ c.fromUserId }} → #{{ c.toUserId }}
+              de #{{ c.id }}
             </div>
           </li>
         </ul>
@@ -313,7 +313,7 @@
           (ngSubmit)="sendComment()"
           class="mt-2 rounded-xl border border-gray-200 p-2"
         >
-          <label class="mb-1 block text-xs font-medium text-gray-600">Nuevo comentario</label>
+          <label class="mb-1 block text-xs font-medium text-gray-600"></label>
           <textarea
             formControlName="message"
             rows="2"

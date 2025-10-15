@@ -30,5 +30,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "from User u where u.id <> :excludeId")
     Page<UserSummary> findAllSummariesExcluding(Long excludeId, Pageable pageable);
     
+    @Query("select u.name from User u where u.id = :id")
+    Optional<String> findNameById(Long id);
+    
 }
 

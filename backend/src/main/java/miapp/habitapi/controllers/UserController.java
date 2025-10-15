@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,6 +35,17 @@ public class UserController {
             return ResponseEntity.ok(service.listOthers(myId));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /** GET /api/users/{id}/name -> { "id": 3, "name": "María" } */
+    @GetMapping("/{id}/name")
+    public ResponseEntity<?> getName(@PathVariable Long id) {
+        try {
+            String name = service.getNameById(id);
+            return ResponseEntity.ok(Map.of("name", name));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
 }

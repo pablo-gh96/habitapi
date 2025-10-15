@@ -5,8 +5,8 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { Habit } from '../models/habit';
 import { HabitService } from '../services/habit.services';
 import { CommentService} from '../services/comment.service';
-import { Comment} from '../models/comment';
 import { CreateComment } from '../dto/CreateComment';
+import { CommentResponse } from '../dto/commentResponse';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
@@ -59,7 +59,7 @@ export class ProfilePageComponent implements OnInit {
 
   // --- Comentarios del día ---
   readonly showCommentsModal = signal(false);
-  readonly comments = signal<Comment[]>([]);
+  readonly comments = signal<CommentResponse[]>([]);
   readonly commentsLoading = signal(false);
   readonly sendingComment = signal(false);
   commentForm!: FormGroup;
@@ -239,9 +239,14 @@ export class ProfilePageComponent implements OnInit {
 
   this.sendingComment.set(true);
   this.commentService.create(body).subscribe({
-    next: (saved) => {
-      // Mantener orden ASC por createdAt -> añadimos al FINAL
-      this.comments.set([...this.comments(), saved]);
+    next: () => {
+      const dayISO = body.day ?? toLocalKey(this.selectedDay()!);
+      this.commentsLoading.set(true);
+      this.commentService.getForDay(USER_ID, dayISO).subscribe({
+        next: (list) => this.comments.set(list),   // ⬅️ lista fresca del backend
+        error: (err) => { console.error('❌ Error recargando comentarios:', err); },
+        complete: () => this.commentsLoading.set(false)
+      });
       this.commentForm.reset({ message: '' });
     },
     error: (err) => {
@@ -251,6 +256,7 @@ export class ProfilePageComponent implements OnInit {
     complete: () => this.sendingComment.set(false)
   });
 }
+  
 }
 
 /* ===== Helpers ===== */

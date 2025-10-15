@@ -21,4 +21,8 @@ export class UsersService {
     }
     return this.http.get<UserSummary[]>(`${this.baseUrl}/others`, { params });
   }
+
+  getNameById(id: number): Observable<{name: string}> {
+    return this.http.get<{name: string}>(`${this.baseUrl}/${id}/name`);
+  }
 }

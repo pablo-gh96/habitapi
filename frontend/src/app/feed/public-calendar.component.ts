@@ -1,8 +1,10 @@
-import { Component, computed, effect, signal, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { Habit } from '../models/habit';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { HabitService } from '../services/habit.services';
+import { Habit } from '../models/habit';
+import { CommentService } from '../services/comment.service';
+import { CommentResponse} from '../dto/commentResponse';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
@@ -13,18 +15,18 @@ type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
   templateUrl: './public-calendar.component.html'
 })
 export class PublicCalendarComponent implements OnInit {
-
-  /* 👇 estos vienen de fuera (feed) */
   @Input() userId!: number;
-  @Input() userName: string = 'Usuario';
-  @Input() avatarUrl: string = 'https://api.dicebear.com/9.x/initials/svg?seed=User';
+  @Input() userName!: string;
+  @Input() avatarUrl!: string;
 
+  // calendario
   readonly baseDate = signal(startOfMonth(new Date()));
   readonly monthLabel = computed(() =>
     this.baseDate().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
   );
   readonly weeks = computed<DayCell[][]>(() => buildMonthMatrix(this.baseDate()));
 
+  // hábitos (solo lectura)
   private readonly habitsByDate = signal<Map<string, Habit[]>>(new Map());
   getHabitsFor(day: Date): Habit[] {
     const key = toLocalKey(day);
@@ -34,22 +36,37 @@ export class PublicCalendarComponent implements OnInit {
   prevMonth() { this.baseDate.set(updateMonth(this.baseDate(), -1)); }
   nextMonth() { this.baseDate.set(updateMonth(this.baseDate(), +1)); }
 
-  constructor(private habitService: HabitService) {}
+  // comentarios del día
+  readonly showCommentsModal = signal(false);
+  readonly comments = signal<CommentResponse[]>([]);
+  readonly commentsLoading = signal(false);
+  readonly sendingComment = signal(false);
+  commentForm!: FormGroup;
+  readonly selectedDay = signal<Date | null>(null);
+
+  constructor(
+    private habitService: HabitService,
+    private fb: FormBuilder,
+    private commentService: CommentService
+  ) {}
 
   ngOnInit(): void {
-    // no hay formulario ni creación aquí
+    // form para enviar comentario
+    this.commentForm = this.fb.group({
+      message: ['', [Validators.required, Validators.maxLength(1000)]]
+    });
   }
 
+  // cargar hábitos cuando cambian mes o userId
   private _loadEff = effect(() => {
     const current = this.baseDate();
-    if (!this.userId) return;
+    const uid = this.userId; // reactivo por Input en Angular 17+: si no, invoca manual en ngOnChanges
+    if (!uid) return;
+
     const year = current.getFullYear();
     const month = current.getMonth() + 1;
-    this.loadMonth(year, month);
-  });
 
-  private loadMonth(year: number, month: number): void {
-    this.habitService.getHabits(this.userId, year, month).subscribe({
+    this.habitService.getHabits(uid, year, month).subscribe({
       next: (items) => {
         const map = new Map<string, Habit[]>();
         for (const raw of items) {
@@ -71,12 +88,58 @@ export class PublicCalendarComponent implements OnInit {
         this.habitsByDate.set(new Map());
       }
     });
+  });
+
+  // abrir/cerrar modal de comentarios
+  openCommentsModal(d: Date) {
+    this.selectedDay.set(d);
+    this.showCommentsModal.set(true);
+    this.commentForm.reset({ message: '' });
+    this.fetchComments(toLocalKey(d));
+  }
+  closeCommentsModal() {
+    this.showCommentsModal.set(false);
+    this.comments.set([]);
+    this.commentForm.reset({ message: '' });
   }
 
-  // click en icono: aquí no hacemos toggle (solo lectura). Si quisieras,
-  // podrías emitir un evento al padre en lugar de mutar.
-  onHabitClick(_h: Habit) { /* no-op en público */ }
+  // pedir comentarios del día al backend
+  private fetchComments(dayISO: string) {
+    this.commentsLoading.set(true);
+    this.commentService.getForDay(this.userId, dayISO).subscribe({
+      next: (list) => this.comments.set(list), // backend devuelve ASC (antiguos primero)
+      error: (err) => { console.error('❌ Error cargando comentarios:', err); this.comments.set([]); },
+      complete: () => this.commentsLoading.set(false)
+    });
+  }
 
+  // enviar comentario (solo añade comentarios, nada de editar/borrar)
+  sendComment() {
+    const msg = this.commentForm.get('message')?.value?.trim();
+    const sel = this.selectedDay();
+    if (!msg || !sel || this.sendingComment()) return;
+
+    const dayISO = toLocalKey(sel);
+    this.sendingComment.set(true);
+    this.commentService.create({
+      message: msg,
+      fromUserId: this.userId,   // o el emisor real si tienes auth; aquí lo mando al propio dueño si no hay auth
+      toUserId: this.userId,
+      day: dayISO
+    }).subscribe({
+      next: () => {
+        this.fetchComments(dayISO);       // recarga desde backend
+        this.commentForm.reset({ message: '' });
+      },
+      error: (err) => {
+        console.error('❌ Error creando comentario:', err);
+        alert('No se pudo enviar el comentario');
+      },
+      complete: () => this.sendingComment.set(false)
+    });
+  }
+
+  // estilos
   statusClasses(status: Habit['status']): string {
     switch (status) {
       case 'done':       return 'bg-emerald-500 ring-emerald-600 text-white';
@@ -85,19 +148,9 @@ export class PublicCalendarComponent implements OnInit {
       default:           return 'bg-gray-300 ring-gray-400 text-gray-800';
     }
   }
-
-  // modal de día (solo visualización)
-  readonly showDayModal = signal(false);
-  readonly selectedDay = signal<Date | null>(null);
-  readonly selectedDayHabits = computed(() => {
-    const d = this.selectedDay();
-    return d ? this.getHabitsFor(d) : [];
-  });
-  openDayModal(d: Date) { this.selectedDay.set(d); this.showDayModal.set(true); }
-  closeDayModal() { this.showDayModal.set(false); }
 }
 
-/* ===== helpers (idénticos) ===== */
+/* ===== Helpers ===== */
 function startOfMonth(d: Date): Date { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function updateMonth(d: Date, delta: number): Date { const nd = new Date(d); nd.setMonth(nd.getMonth() + delta); return startOfMonth(nd); }
 function startOfWeekMonday(d: Date): Date { const day = (d.getDay() + 6) % 7; const sd = new Date(d); sd.setDate(d.getDate() - day); sd.setHours(0,0,0,0); return sd; }

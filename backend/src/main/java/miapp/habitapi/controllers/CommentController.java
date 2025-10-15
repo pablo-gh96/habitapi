@@ -1,5 +1,6 @@
 package miapp.habitapi.controllers;
 
+import miapp.habitapi.dto.CommentResponse;
 import miapp.habitapi.dto.CreateCommentRequest;
 import miapp.habitapi.models.Comment;
 import miapp.habitapi.service.CommentService;
@@ -21,18 +22,13 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    /**
-     * GET /api/comments/day?userId=1&day=2025-10-13
-     * Devuelve comentarios (más recientes primero) donde el usuario participa
-     * como emisor o receptor durante ese día.
-     */
     @GetMapping("/day")
     public ResponseEntity<?> getCommentsForDay(
             @RequestParam Long userId,
             @RequestParam LocalDate day
     ) {
         try {
-            List<Comment> data = commentService.getCommentsForDay(userId, day);
+            List<CommentResponse> data = commentService.getCommentsForDay(userId, day);
             return ResponseEntity.ok(data);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));

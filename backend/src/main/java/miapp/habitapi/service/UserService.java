@@ -48,4 +48,12 @@ public class UserService {
         if (myId == null) throw new IllegalArgumentException("myId is required");
         return repo.findAllSummariesExcluding(myId, PageRequest.of(page, size)).getContent();
     }
+    
+    public String getNameById(Long id) {
+        if (id == null) throw new IllegalArgumentException("id is required");
+        return repo.findNameById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+    }
+    
+
 }

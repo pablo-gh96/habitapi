@@ -1,5 +1,6 @@
 package miapp.habitapi.service;
 
+import miapp.habitapi.dto.CommentResponse;
 import miapp.habitapi.models.Comment;
 import miapp.habitapi.models.User;
 import miapp.habitapi.repository.CommentRepository;
@@ -12,6 +13,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -24,14 +26,10 @@ public class CommentService {
         this.userRepo = userRepo;
     }
 
-    /**
-     * Comentarios donde participa el usuario (como emisor o receptor) en un día concreto.
-     * Ordenados del más antiguo al más reciente.
-     */
-    public List<Comment> getCommentsForDay(Long userId, LocalDate day) {
+    public List<CommentResponse> getCommentsForDay(Long userId, LocalDate day) {
         if (userId == null) throw new IllegalArgumentException("userId is required");
         if (day == null) throw new IllegalArgumentException("day is required");
-        return commentRepo.findByToUserIdAndTargetDateOrderByCreatedAtAsc(userId, day);
+        return commentRepo.findDayCommentsForUser(userId, day);
     }
     
     @Transactional
@@ -58,5 +56,16 @@ public class CommentService {
         c.setTargetDate(targetDate); // ⬅️ guardar el día objetivo
         // createdAt se rellena con @PrePersist en la entidad
         return commentRepo.save(c);
+    }
+    
+    private CommentResponse toResponse(Comment c) {
+        return new CommentResponse(
+            c.getId(),
+            c.getMessage(),
+            c.getCreatedAt(),
+            c.getTargetDate(),
+            c.getFromUser().getName(),
+            c.getToUser().getName()
+        );
     }
 }

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Comment } from '../models/comment';
 import { CreateComment } from '../dto/CreateComment';
+import { CommentResponse } from '../dto/commentResponse';
 
 @Injectable({ providedIn: 'root' })
 export class CommentService {
@@ -11,9 +12,9 @@ export class CommentService {
   constructor(private http: HttpClient) {}
 
   /** Comentarios de un día donde participa userId (emisor o receptor) */
-  getForDay(userId: number, dayISO: string): Observable<Comment[]> {
+  getForDay(userId: number, dayISO: string): Observable<CommentResponse[]> {
     const params = new HttpParams().set('userId', userId).set('day', dayISO);
-    return this.http.get<Comment[]>(`${this.baseUrl}/day`, { params });
+    return this.http.get<CommentResponse[]>(`${this.baseUrl}/day`, { params });
   }
 
     // ⬇️ nuevo: crear comentario

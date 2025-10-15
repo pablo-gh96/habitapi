@@ -1,139 +1,147 @@
-<div class="min-h-screen bg-gray-50">
-  <!-- Cabecera de perfil -->
-  <header class="mx-auto max-w-5xl px-4 pt-10">
-    <div class="flex items-center gap-4">
-      <img
-        [src]="avatarUrl"
-        alt="avatar"
-        class="h-16 w-16 rounded-2xl shadow-sm ring-1 ring-gray-200"
-      />
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-          Perfil de {{ userName }}
-        </h1>
-        <p class="text-sm text-gray-500">Calendario</p>
-      </div>
+<div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+  <!-- Cabecera -->
+  <header class="mb-4 flex items-center gap-3">
+    <img [src]="avatarUrl" alt="avatar" class="h-10 w-10 rounded-xl ring-1 ring-gray-200" />
+    <div>
+      <div class="text-base font-semibold text-gray-900">{{ userName }}</div>
+      <div class="text-xs text-gray-500">Calendario</div>
     </div>
   </header>
 
-  <main class="mx-auto max-w-5xl px-4 py-8">
-    <!-- 👇 SIN botón de “+ Nuevo hábito” -->
-
-    <!-- Calendario -->
-    <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-      <!-- Controles de mes -->
-      <div class="mb-4 flex items-center justify-between">
-        <button
-          (click)="prevMonth()"
-          class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]"
-        >
-          ← Anterior
-        </button>
-        <div class="text-lg font-medium capitalize tracking-tight text-gray-900">
-          {{ monthLabel() }}
-        </div>
-        <button
-          (click)="nextMonth()"
-          class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]"
-        >
-          Siguiente →
-        </button>
-      </div>
-
-      <!-- Días de la semana -->
-      <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-500">
-        <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
-      </div>
-
-      <!-- Celdas del calendario -->
-      <div class="mt-2 grid grid-cols-7 gap-2">
-        <ng-container *ngFor="let week of weeks()">
-          <ng-container *ngFor="let day of week">
-            <div
-              class="relative aspect-square rounded-xl p-2 text-sm transition ring-1"
-              [ngClass]="{
-                'bg-white text-gray-900 ring-gray-200': day.inCurrentMonth && !day.isToday,
-                'bg-gray-50 text-gray-400 ring-gray-200': !day.inCurrentMonth,
-                'bg-white text-gray-900 ring-2 ring-gray-900': day.isToday
-              }"
-              [title]="day.date | date : 'fullDate'"
-            >
-              <!-- Número del día -->
-              <div class="mb-1">
-                <span class="font-medium">{{ day.date | date : 'd' }}</span>
-              </div>
-
-              <!-- Hábitos del día -->
-              <div class="flex flex-wrap gap-1">
-                <ng-container *ngFor="let h of getHabitsFor(day.date)">
-                  <span
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-md text-xs ring-1"
-                    [ngClass]="statusClasses(h.status)"
-                    [title]="h.title"
-                    (click)="onHabitClick(h)">
-                    {{ h.icon }}
-                  </span>
-                </ng-container>
-              </div>
-
-              <!-- Botón "+" abajo a la derecha para ver tareas del día (lo mantenemos) -->
-              <button
-                type="button"
-                (click)="openDayModal(day.date)"
-                class="absolute bottom-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100 active:scale-[0.98]"
-                aria-label="Ver tareas del día"
-              >
-                +
-              </button>
-            </div>
-          </ng-container>
-        </ng-container>
-      </div>
+  <!-- Controles de mes -->
+  <div class="mb-4 flex items-center justify-between">
+    <button
+      (click)="prevMonth()"
+      class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]">
+      ← Anterior
+    </button>
+    <div class="text-lg font-medium capitalize tracking-tight text-gray-900">
+      {{ monthLabel() }}
     </div>
-  </main>
+    <button
+      (click)="nextMonth()"
+      class="rounded-xl px-3 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50 active:scale-[0.98]">
+      Siguiente →
+    </button>
+  </div>
 
-  <!-- Modal: Tareas del día (solo lectura) -->
-  <div *ngIf="showDayModal()" class="fixed inset-0 z-50">
-    <div class="absolute inset-0 bg-black/40" (click)="closeDayModal()"></div>
+  <!-- Días de la semana -->
+  <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-500">
+    <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+  </div>
 
-    <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
-      <div class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-gray-900">
-            Tareas — {{ selectedDay() | date : 'fullDate' }}
-          </h2>
-          <button type="button" (click)="closeDayModal()" aria-label="Cerrar"
-                  class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50">
-            &times;
-          </button>
-        </div>
+  <!-- Celdas del calendario -->
+  <div class="mt-2 grid grid-cols-7 gap-2">
+    <ng-container *ngFor="let week of weeks()">
+      <ng-container *ngFor="let day of week">
+        <div
+          class="relative aspect-square rounded-xl p-2 text-sm transition ring-1"
+          [ngClass]="{
+            'bg-white text-gray-900 ring-gray-200': day.inCurrentMonth && !day.isToday,
+            'bg-gray-50 text-gray-400 ring-gray-200': !day.inCurrentMonth,
+            'bg-white text-gray-900 ring-2 ring-gray-900': day.isToday
+          }"
+          [title]="day.date | date : 'fullDate'">
 
-        <div *ngIf="selectedDayHabits().length === 0" class="text-sm text-gray-500">
-          No hay tareas para este día.
-        </div>
+          <!-- Número del día -->
+          <div class="mb-1">
+            <span class="font-medium">{{ day.date | date : 'd' }}</span>
+          </div>
 
-        <ul class="space-y-2" *ngIf="selectedDayHabits().length > 0">
-          <li *ngFor="let h of selectedDayHabits()"
-              class="flex items-center justify-between rounded-lg border border-gray-200 p-2">
-            <div class="flex items-center gap-2">
+          <!-- Hábitos del día (solo lectura) -->
+          <div class="flex flex-wrap gap-1">
+            <ng-container *ngFor="let h of getHabitsFor(day.date)">
               <span
-                class="inline-flex h-7 w-7 items-center justify-center rounded-md text-sm ring-1"
+                class="inline-flex h-6 w-6 items-center justify-center rounded-md text-xs ring-1"
                 [ngClass]="statusClasses(h.status)"
-              >
+                [title]="h.title">
                 {{ h.icon }}
               </span>
-              <div class="text-sm text-gray-900">{{ h.title }}</div>
-            </div>
-            <!-- sin botón de borrar en público -->
-          </li>
-        </ul>
+            </ng-container>
+          </div>
 
-        <div class="mt-4 flex justify-end">
-          <button type="button" (click)="closeDayModal()"
-                  class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
-            Cerrar
+          <!-- Botón de comentarios 💬 -->
+          <div class="absolute bottom-1 right-1">
+            <button
+              type="button"
+              (click)="openCommentsModal(day.date)"
+              class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100 active:scale-[0.98]"
+              aria-label="Ver comentarios del día"
+              title="Comentarios del día">
+              💬
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Modal: Comentarios del día -->
+<div *ngIf="showCommentsModal()" class="fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/40" (click)="closeCommentsModal()"></div>
+
+  <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
+    <div class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">
+          Comentarios — {{ selectedDay() | date : 'fullDate' }}
+        </h2>
+        <button
+          type="button"
+          (click)="closeCommentsModal()"
+          aria-label="Cerrar"
+          class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50">
+          &times;
+        </button>
+      </div>
+
+      <div *ngIf="commentsLoading()" class="text-sm text-gray-500">Cargando…</div>
+
+      <div *ngIf="!commentsLoading() && comments().length === 0" class="text-sm text-gray-500">
+        No hay comentarios.
+      </div>
+
+      <ul *ngIf="!commentsLoading() && comments().length > 0" class="space-y-2 mb-4">
+        <li *ngFor="let c of comments()" class="rounded-lg border border-gray-200 p-2">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-900">{{ c.message }}</div>
+            <div class="text-xs text-gray-500">{{ c.createdAt | date:'HH:mm:ss' }}</div>
+          </div>
+          <div class="mt-1 text-xs text-gray-500">
+            de {{ c.fromUserName }} → {{ c.toUserName }}
+          </div>
+        </li>
+      </ul>
+
+      <form
+        [formGroup]="commentForm"
+        (ngSubmit)="sendComment()"
+        class="mt-2 rounded-xl border border-gray-200 p-2">
+        <label class="mb-1 block text-xs font-medium text-gray-600">Nuevo comentario</label>
+        <textarea
+          formControlName="message"
+          rows="2"
+          placeholder="Escribe un mensaje y pulsa Enter…"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+          (keydown.enter)="sendComment(); $event.preventDefault()"></textarea>
+        <div class="mt-2 flex justify-end">
+          <button
+            type="submit"
+            [disabled]="commentForm.invalid || sendingComment()"
+            class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 active:scale-[0.98]">
+            {{ sendingComment() ? 'Enviando…' : 'Enviar' }}
           </button>
         </div>
+      </form>
+
+      <div class="mt-4 flex justify-end">
+        <button
+          type="button"
+          (click)="closeCommentsModal()"
+          class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
+          Cerrar
+        </button>
       </div>
     </div>
   </div>
