@@ -1,10 +1,15 @@
 package miapp.habitapi.controllers;
 
 import miapp.habitapi.dto.UserSummary;
+import miapp.habitapi.models.User;
 import miapp.habitapi.service.UserService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -49,4 +54,12 @@ public class UserController {
         }
     }
     
+    
+    @PostMapping
+    public ResponseEntity<?> create(@Valid @RequestBody User user, BindingResult result) {
+        if (result.hasErrors()) {
+            return validation(result);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(user));
+    }
 }

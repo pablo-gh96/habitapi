@@ -107,5 +107,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setContentType(CONTENT_TYPE);
         response.setStatus(401);
     }
+    
+    
 
 }

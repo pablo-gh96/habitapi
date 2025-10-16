@@ -1,59 +1,28 @@
 package miapp.habitapi.service;
 
+
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 
-import miapp.habitapi.dto.UserSummary;
 import miapp.habitapi.models.User;
-import miapp.habitapi.repository.UserRepository;
+import miapp.habitapi.dto.UserRequest;
 
-@Service
-public class UserService {
+public interface UserService {
 
-    private final UserRepository repo;
+    List<User> findAll();
 
-    public UserService(UserRepository repo) {
-        this.repo = repo;
-    }
+    Page<User> findAll(Pageable pageable);
 
-    public User createAccount(User user) {
-        if (user.getName() == null || user.getName().isBlank() ||
-            user.getPassword() == null || user.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Nombre y contraseña son obligatorios");
-        }
+    Optional<User> findById(@NonNull Long id);
 
-        if (repo.existsByName(user.getName())) {
-            throw new IllegalArgumentException("El usuario ya existe");
-        }
+    User save(User user);
 
-        return repo.save(user);
-    }
+    Optional<User> update(UserRequest user, Long id);
 
-    // Login simple
-    public Optional<User> login(User user) {
-        return repo.findByName(user.getName())
-                .filter(u -> u.getPassword().equals(user.getPassword()));
-    }
-    
-    public List<UserSummary> listOthers(Long myId) {
-        if (myId == null) throw new IllegalArgumentException("myId is required");
-        return repo.findAllSummariesExcluding(myId);
-    }
-
-    // Variante paginada (por si la quieres)
-    public List<UserSummary> listOthers(Long myId, int page, int size) {
-        if (myId == null) throw new IllegalArgumentException("myId is required");
-        return repo.findAllSummariesExcluding(myId, PageRequest.of(page, size)).getContent();
-    }
-    
-    public String getNameById(Long id) {
-        if (id == null) throw new IllegalArgumentException("id is required");
-        return repo.findNameById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
-    }
-    
-
+    void deleteById(Long id);
 }
