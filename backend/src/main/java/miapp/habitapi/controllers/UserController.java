@@ -38,7 +38,7 @@ public class UserController {
         }
     }
     
-    /** GET /api/users/{id}/name -> { "id": 3, "name": "María" } */
+    
     @GetMapping("/{id}/name")
     public ResponseEntity<?> getName(@PathVariable Long id) {
         try {
@@ -48,4 +48,5 @@ public class UserController {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
+    
 }
