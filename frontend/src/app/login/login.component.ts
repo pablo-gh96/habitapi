@@ -17,7 +17,7 @@ export class LoginComponent {
   serverMsg = signal<{ type: 'ok' | 'error'; text: string } | null>(null);
 
   form = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
+    username: ['', [Validators.required, Validators.minLength(3)]],
     password: ['', [Validators.required, Validators.minLength(3)]],
   });
 
@@ -26,15 +26,10 @@ export class LoginComponent {
     if (this.form.invalid) return;
     this.loading.set(true);
 
-    const { name, password } = this.form.getRawValue()!;
-    this.auth.login({
-      name: name ?? '',
-      password: password ?? ''
-    }).subscribe({
+    const { username, password } = this.form.getRawValue()!;
+    this.auth.login(username ?? '', password ?? '').subscribe({
       next: (res) => {
         this.serverMsg.set({ type: 'ok', text: res?.message ?? 'Login correcto' });
-        // Aquí puedes navegar a /perfil o recargar calendario
-        // this.router.navigate(['/perfil']);
       },
       error: (err) => {
         const text = err?.error?.error ?? 'Credenciales inválidas';

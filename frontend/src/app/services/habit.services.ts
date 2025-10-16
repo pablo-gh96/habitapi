@@ -18,7 +18,7 @@ export class HabitService {
     return this.http.get<Habit[]>(this.baseUrl, { params });
   }
 
-  /** Crear 1..n hábitos (según repeat) para el usuario (CreateHabit debe llevar userId) */
+  
   create(habit: CreateHabit): Observable<Habit[]> {
     // habit.userId debe venir informado desde el componente
     return this.http.post<Habit[]>(this.baseUrl, habit);
