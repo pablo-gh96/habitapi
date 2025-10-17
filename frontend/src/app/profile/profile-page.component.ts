@@ -9,6 +9,7 @@ import { CreateComment } from '../dto/CreateComment';
 import { CommentResponse } from '../dto/commentResponse';
 import { ActivatedRoute } from '@angular/router';
 import { UsersService } from '../services/user.services';
+import { Router } from '@angular/router';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
@@ -27,7 +28,7 @@ export class ProfilePageComponent implements OnInit {
   
   private readonly route = inject(ActivatedRoute);
   username = this.route.snapshot.paramMap.get('username') || '';
-
+  private router = inject(Router);
   readonly avatarUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=' + this.username;
 
   // --- Calendario base ---
@@ -83,8 +84,11 @@ export class ProfilePageComponent implements OnInit {
     this.userService.getIdByUsername(this.username).subscribe({
       next: (res) => {
         this.USER_ID = res.id;
-        this.reloadCurrentMonth()
-      }
+      },
+        error: (err) => {
+        console.error('Usuario no encontrado:', err);
+        this.router.navigate(['/not-found']); // redirige a página 404
+        }
     });
     // Form crear hábito
     this.createForm = this.fb.group({

@@ -190,7 +190,7 @@ public class HabitService {
      * Si no se pasa year/month, usa el mes actual.
      */
     public List<Habit> getHabitsForMonth(Long userId, Integer year, Integer month) {
-        if(userId.equals(0)) {
+        if(userId==0) {
         	userId = getUser().getId();
         }
         YearMonth ym = (year != null && month != null) ? YearMonth.of(year, month) : YearMonth.now();
