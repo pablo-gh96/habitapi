@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.apphabit.backend.entities.User;
 import com.apphabit.backend.models.UserRequest;
+import com.apphabit.backend.models.UserResponse;
 import com.apphabit.backend.services.UserService;
 
 import jakarta.validation.Valid;
@@ -97,4 +98,28 @@ public class UserController {
         });
         return ResponseEntity.badRequest().body(errors);
     }
+    
+    @GetMapping("/username/{username}/id")
+    public ResponseEntity<?> getIdfromUsername(@PathVariable String username){
+    	try {
+    		Long id = service.getIdFromUsername(username);
+            return ResponseEntity.ok((Map.of("id",id)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    @GetMapping("/ids-others")
+    public ResponseEntity<?> getOtherUserIds() {
+
+    	try {
+    		List<UserResponse> others = service.findAllIdsExcept();
+            return ResponseEntity.ok(others);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    
+    
 }

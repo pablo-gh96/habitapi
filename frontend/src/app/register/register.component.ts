@@ -20,7 +20,7 @@ export class RegisterComponent {
     password: ['', [Validators.required, Validators.minLength(3)]],
     confirm: ['', [Validators.required, Validators.minLength(3)]],
     username: ['', [Validators.required, Validators.minLength(3)]],
-    lastName: ['', [Validators.required, Validators.minLength(3)]],
+    lastname: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]]
   });
 
@@ -28,19 +28,19 @@ export class RegisterComponent {
     this.serverMsg.set(null);
     if (this.form.invalid) return;
 
-    const {username, password, confirm, name, lastName, email } = this.form.getRawValue()!;
+    const {username, password, confirm, name, lastname, email } = this.form.getRawValue()!;
     if (password !== confirm) {
       this.serverMsg.set({ type: 'error', text: 'Las contraseñas no coinciden.' });
       return;
     }
 
     // Ensure name and password are strings (not null)
-    if (typeof name !== 'string' || typeof password !== 'string' || typeof username !== 'string' || typeof lastName !== 'string' || typeof email !== 'string') {
+    if (typeof name !== 'string' || typeof password !== 'string' || typeof username !== 'string' || typeof lastname !== 'string' || typeof email !== 'string') {
       this.serverMsg.set({ type: 'error', text: 'Nombre y contraseña son requeridos.' });
       return;
     }
 
-    this.auth.register({ username, password, name, lastName, email }).subscribe({
+    this.auth.register({ username, password, name, lastname, email }).subscribe({
       next: (res) => {
         const text = res?.message ?? 'Usuario creado correctamente';
         this.serverMsg.set({ type: 'ok', text });

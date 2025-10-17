@@ -26,8 +26,8 @@ export class HabitService {
 
   /** Toggle de estado asegurando pertenencia a userId */
   updateStatus(userId: number, id: number): Observable<Habit> {
-    const params = new HttpParams().set('userId', String(userId));
-    return this.http.patch<Habit>(`${this.baseUrl}/${id}/status`, {}, { params });
+    
+    return this.http.put<Habit>(`${this.baseUrl}/${id}/status`, {}, );
   }
 
   /** Borrado de una ocurrencia por id y userId */
@@ -39,7 +39,6 @@ export class HabitService {
   /** Borrado masivo por título para un usuario */
   deleteByTitle(userId: number, title: string): Observable<{ deleted: number }> {
     const params = new HttpParams()
-      .set('userId', String(userId))
       .set('title', title);
     return this.http.delete<{ deleted: number }>(`${this.baseUrl}/by-title`, { params });
   }

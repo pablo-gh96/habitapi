@@ -1,5 +1,5 @@
 // src/app/profile-page/profile-page.component.ts
-import { Component, computed, effect, signal, OnInit } from '@angular/core';
+import { Component, computed, effect, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Habit } from '../models/habit';
@@ -7,11 +7,13 @@ import { HabitService } from '../services/habit.services';
 import { CommentService} from '../services/comment.service';
 import { CreateComment } from '../dto/CreateComment';
 import { CommentResponse } from '../dto/commentResponse';
+import { ActivatedRoute } from '@angular/router';
+import { UsersService } from '../services/user.services';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
-// TODO: sustituir por el id real cuando tengas login
-const USER_ID = 1;
+
+
 
 @Component({
   selector: 'app-profile-page',
@@ -21,8 +23,12 @@ const USER_ID = 1;
 })
 export class ProfilePageComponent implements OnInit {
 
-  readonly userName = 'Pablo';
-  readonly avatarUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=Pablo';
+  private USER_ID = 0;
+  
+  private readonly route = inject(ActivatedRoute);
+  username = this.route.snapshot.paramMap.get('username') || '';
+
+  readonly avatarUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=' + this.username;
 
   // --- Calendario base ---
   readonly baseDate = signal(startOfMonth(new Date()));
@@ -67,12 +73,19 @@ export class ProfilePageComponent implements OnInit {
   constructor(
     private habitService: HabitService,
     private fb: FormBuilder,
-    private commentService: CommentService
+    private commentService: CommentService,
+    private userService: UsersService
   ) {}
 
   ngOnInit(): void {
     const today = toLocalKey(new Date());
-
+    
+    this.userService.getIdByUsername(this.username).subscribe({
+      next: (res) => {
+        this.USER_ID = res.id;
+        this.reloadCurrentMonth()
+      }
+    });
     // Form crear hábito
     this.createForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(80)]],
@@ -96,7 +109,7 @@ export class ProfilePageComponent implements OnInit {
   });
 
   private loadMonth(year: number, month: number): void {
-    this.habitService.getHabits(USER_ID, year, month).subscribe({
+    this.habitService.getHabits(this.USER_ID, year, month).subscribe({
       next: (items) => {
         const map = new Map<string, Habit[]>();
         for (const raw of items) {
@@ -137,7 +150,6 @@ export class ProfilePageComponent implements OnInit {
       icon: v.icon,
       date: v.date, // 'YYYY-MM-DD'
       repeat: (v.repeat as string).toUpperCase() as any, // ONCE|DAILY|WEEKLY|MONTHLY
-      userId: USER_ID
     };
 
     this.habitService.create(payload as any).subscribe({
@@ -148,7 +160,7 @@ export class ProfilePageComponent implements OnInit {
 
   // --- Interacción con hábitos ---
   onHabitClick(h: Habit) {
-    this.habitService.updateStatus(USER_ID, h.id).subscribe({
+    this.habitService.updateStatus(this.USER_ID, h.id).subscribe({
       next: () => this.reloadCurrentMonth(),
       error: (err) => console.error('❌ Error al cambiar estado:', err)
     });
@@ -169,7 +181,7 @@ export class ProfilePageComponent implements OnInit {
 
   // --- Borrado de hábitos ---
   onDeleteHabit(h: Habit) {
-    this.habitService.delete(USER_ID, h.id).subscribe({
+    this.habitService.delete(this.USER_ID, h.id).subscribe({
       next: () => this.reloadCurrentMonth(),
       error: (err) => console.error('❌ Error al borrar hábito:', err)
     });
@@ -180,7 +192,7 @@ export class ProfilePageComponent implements OnInit {
 
   confirmDeleteSingle() {
     if (!this.habitToDelete) return;
-    this.habitService.delete(USER_ID, this.habitToDelete.id).subscribe({
+    this.habitService.delete(this.USER_ID, this.habitToDelete.id).subscribe({
       next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
       error: (err) => console.error('❌ Error al borrar por id:', err)
     });
@@ -188,7 +200,7 @@ export class ProfilePageComponent implements OnInit {
   confirmDeleteAll() {
     if (!this.habitToDelete) return;
     const title = this.habitToDelete.title;
-    this.habitService.deleteByTitle(USER_ID, title).subscribe({
+    this.habitService.deleteByTitle(this.USER_ID, title).subscribe({
       next: () => { this.closeConfirmDelete(); this.reloadCurrentMonth(); },
       error: (err) => console.error('❌ Error al borrar por título:', err)
     });
@@ -207,7 +219,7 @@ export class ProfilePageComponent implements OnInit {
 
     const dayISO = toLocalKey(d);
     this.commentsLoading.set(true);
-    this.commentService.getForDay(USER_ID, dayISO).subscribe({
+    this.commentService.getForDay(this.USER_ID, dayISO).subscribe({
       next: (list) => {
         // backend ya devuelve ASC por createdAt; no hace falta ordenar aquí
         this.comments.set(list);
@@ -232,8 +244,8 @@ export class ProfilePageComponent implements OnInit {
 
   const body: CreateComment = {
     message: msg,
-    fromUserId: USER_ID,
-    toUserId: USER_ID,         // si luego eliges destinatario, cámbialo aquí
+    fromUserId: sessionStorage.getItem('userId') ? Number(sessionStorage.getItem('userId')) : 0,
+    toUserId: this.USER_ID,         // si luego eliges destinatario, cámbialo aquí
     day: toLocalKey(sel)       // 'YYYY-MM-DD'
   };
 
@@ -242,7 +254,7 @@ export class ProfilePageComponent implements OnInit {
     next: () => {
       const dayISO = body.day ?? toLocalKey(this.selectedDay()!);
       this.commentsLoading.set(true);
-      this.commentService.getForDay(USER_ID, dayISO).subscribe({
+      this.commentService.getForDay(this.USER_ID, dayISO).subscribe({
         next: (list) => this.comments.set(list),   // ⬅️ lista fresca del backend
         error: (err) => { console.error('❌ Error recargando comentarios:', err); },
         complete: () => this.commentsLoading.set(false)

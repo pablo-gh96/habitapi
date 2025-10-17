@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,8 @@ import { CommonModule } from '@angular/common';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
-
+  private router = inject(Router);
+  
   loading = signal(false);
   serverMsg = signal<{ type: 'ok' | 'error'; text: string } | null>(null);
 
@@ -29,7 +31,8 @@ export class LoginComponent {
     const { username, password } = this.form.getRawValue()!;
     this.auth.login(username ?? '', password ?? '').subscribe({
       next: (res) => {
-        this.serverMsg.set({ type: 'ok', text: res?.message ?? 'Login correcto' });
+        const myUsername = sessionStorage.getItem('username');
+        this.router.navigate(['/', myUsername]);
       },
       error: (err) => {
         const text = err?.error?.error ?? 'Credenciales inválidas';

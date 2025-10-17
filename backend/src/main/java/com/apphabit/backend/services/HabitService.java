@@ -37,15 +37,7 @@ public class HabitService {
         this.userRepository = userRepository;
     }
     
-    public Habit createHabitsFor(CreateHabitRequest req) {
-    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    	String username = (String) auth.getPrincipal();
-    	User user = userRepository.findByUsername(username)
-    	        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-    	Habit habit = fromRequest(req,user);
-    	return habitRepository.save(habit);
-    }
-    
+
     /**
      * Crea hábitos (una vez / diario / semanal / mensual) para el userId incluido en el DTO.
      * Expande solo dentro del AÑO de la fecha base.
@@ -197,14 +189,15 @@ public class HabitService {
      * Devuelve todos los hábitos del mes indicado para un userId.
      * Si no se pasa year/month, usa el mes actual.
      */
-    public List<Habit> getHabitsForMonth(Integer year, Integer month) {
-        User user = getUser();
-
+    public List<Habit> getHabitsForMonth(Long userId, Integer year, Integer month) {
+        if(userId.equals(0)) {
+        	userId = getUser().getId();
+        }
         YearMonth ym = (year != null && month != null) ? YearMonth.of(year, month) : YearMonth.now();
         LocalDate start = ym.atDay(1);
         LocalDate end = ym.atEndOfMonth();
 
-        return habitRepository.findByUserIdAndDateBetweenOrderByTitleAsc(user.getId(), start, end);
+        return habitRepository.findByUserIdAndDateBetweenOrderByTitleAsc(userId, start, end);
     }
 }
 

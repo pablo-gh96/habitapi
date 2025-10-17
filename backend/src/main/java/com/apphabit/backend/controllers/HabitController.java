@@ -32,7 +32,7 @@ public class HabitController {
 
     @PostMapping
     public ResponseEntity<?> create(@Validated @RequestBody CreateHabitRequest req) {
-    	Habit saved = habitService.createHabitsFor(req); // overload por username
+    	List<Habit> saved = habitService.createHabits(req); // overload por username
     	return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -73,7 +73,7 @@ public class HabitController {
      * PATCH /api/habits/{id}/status?userId=1
      * Cicla el estado del hábito asegurando pertenencia a userId.
      */
-    @PatchMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     public ResponseEntity<?> toggleHabitStatus(
             @PathVariable Long id
     ) {
@@ -92,11 +92,12 @@ public class HabitController {
      */
     @GetMapping
     public ResponseEntity<?> getHabitsForMonth(
+    		@RequestParam Long userId,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month
     ) {
         try {
-            List<Habit> habits = habitService.getHabitsForMonth(year, month);
+            List<Habit> habits = habitService.getHabitsForMonth(userId,year, month);
             return ResponseEntity.ok(habits);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

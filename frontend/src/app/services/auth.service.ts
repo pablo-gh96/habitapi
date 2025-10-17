@@ -6,7 +6,7 @@ export interface Credentials {
   username: string;
   password: string;
   name: string;
-  lastName: string;
+  lastname: string;
   email: string;
 }
 
@@ -17,7 +17,7 @@ export class AuthService {
   private baseUrl = 'http://localhost:8080';
 
   register(body: Credentials): Observable<any> {
-    return this.http.post(`${this.baseUrl}/register`, body);
+    return this.http.post(`${this.baseUrl}/api/users`, body);
   }
 
   login(username: string, password: string): Observable<any> {
@@ -45,6 +45,6 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return !this.getToken();
   }
 }

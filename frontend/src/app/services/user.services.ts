@@ -4,7 +4,9 @@ import { Observable } from 'rxjs';
 
 export interface UserSummary {
   id: number;
+  username: string;
   name: string;
+  lastname: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -14,15 +16,15 @@ export class UsersService {
   constructor(private http: HttpClient) {}
 
   /** Lista de usuarios excepto el mío */
-  getOthers(myId: number, page?: number, size?: number): Observable<UserSummary[]> {
-    let params = new HttpParams().set('myId', myId);
-    if (page != null && size != null) {
-      params = params.set('page', page).set('size', size);
-    }
-    return this.http.get<UserSummary[]>(`${this.baseUrl}/others`, { params });
+  getOthers(): Observable<UserSummary[]> {
+    return this.http.get<UserSummary[]>(`${this.baseUrl}/ids-others`);
   }
 
   getNameById(id: number): Observable<{name: string}> {
     return this.http.get<{name: string}>(`${this.baseUrl}/${id}/name`);
   }
+
+  getIdByUsername(username: string): Observable<{id: number}> {
+    return this.http.get<{id: number}>(`${this.baseUrl}/username/${username}/id`);
+  }  
 }

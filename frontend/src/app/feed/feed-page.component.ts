@@ -7,8 +7,7 @@ import { from } from 'rxjs';
 
 type UserView = { id: number; name: string; avatarUrl: string };
 
-// TODO: sustituir por el id real del usuario autenticado
-const MY_ID = 1;
+
 
 @Component({
   selector: 'app-feed-page',
@@ -38,7 +37,7 @@ export class FeedPageComponent implements OnInit {
   users: UserView[] = [];
 
   ngOnInit(): void {
-    this.usersSvc.getOthers(MY_ID).subscribe({
+    this.usersSvc.getOthers().subscribe({
       next: (list: UserSummary[]) => {
         this.users = list.map(u => ({
           id: u.id,

@@ -9,6 +9,7 @@ import org.springframework.lang.NonNull;
 
 import com.apphabit.backend.entities.User;
 import com.apphabit.backend.models.UserRequest;
+import com.apphabit.backend.models.UserResponse;
 
 public interface UserService {
 
@@ -23,4 +24,8 @@ public interface UserService {
     Optional<User> update(UserRequest user, Long id);
 
     void deleteById(Long id);
+    
+    Long getIdFromUsername(String username);
+    
+    List<UserResponse> findAllIdsExcept();
 }

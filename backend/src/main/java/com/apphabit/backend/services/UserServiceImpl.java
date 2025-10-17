@@ -2,11 +2,14 @@ package com.apphabit.backend.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,7 @@ import com.apphabit.backend.entities.Role;
 import com.apphabit.backend.entities.User;
 import com.apphabit.backend.models.IUser;
 import com.apphabit.backend.models.UserRequest;
+import com.apphabit.backend.models.UserResponse;
 import com.apphabit.backend.repositories.RoleRepository;
 import com.apphabit.backend.repositories.UserRepository;
 
@@ -95,4 +99,36 @@ public class UserServiceImpl implements UserService{
         return roles;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Long getIdFromUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("El nombre de usuario no puede ser nulo o vacío");
+        }
+
+        return repository.findByUsername(username)
+                .map(User::getId)
+                .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado: " + username));
+    }
+    
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> findAllIdsExcept() {
+    	User user = getUser();
+    	List<User> otherUsers = repository.findAllExcept(user.getId());
+    	List<UserResponse> otherUsersResponse = otherUsers.stream().map(u->new UserResponse(u.getId(), 
+    			u.getUsername(),
+                u.getName(),
+                u.getLastname(),
+                u.getEmail())).toList();
+    	
+        return otherUsersResponse;
+    }
+    
+    private User getUser() {
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    	String username = (String) auth.getPrincipal();
+    	return repository.findByUsername(username)
+    	        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+    }
 }
