@@ -9,7 +9,7 @@ import { CreateComment } from '../dto/CreateComment';
 import { CommentResponse } from '../dto/commentResponse';
 import { ActivatedRoute } from '@angular/router';
 import { UsersService } from '../services/user.services';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
@@ -19,15 +19,24 @@ type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './profile-page.component.html'
 })
 export class ProfilePageComponent implements OnInit {
 
   private USER_ID = 0;
   
+  logout(): void {
+    // Borra el token del almacenamiento local
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    sessionStorage.clear();
+
+    // Redirige al login
+    this.router.navigate(['/login']);
+  }
   private readonly route = inject(ActivatedRoute);
-  username = this.route.snapshot.paramMap.get('username') || '';
+  username = sessionStorage.getItem('username') || '';
   private router = inject(Router);
   readonly avatarUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=' + this.username;
 
@@ -271,6 +280,7 @@ export class ProfilePageComponent implements OnInit {
     },
     complete: () => this.sendingComment.set(false)
   });
+  
 }
   
 }

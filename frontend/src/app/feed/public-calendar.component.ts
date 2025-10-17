@@ -26,6 +26,7 @@ export class PublicCalendarComponent implements OnInit {
   );
   readonly weeks = computed<DayCell[][]>(() => buildMonthMatrix(this.baseDate()));
 
+
   // hábitos (solo lectura)
   private readonly habitsByDate = signal<Map<string, Habit[]>>(new Map());
   getHabitsFor(day: Date): Habit[] {

@@ -3,10 +3,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Habit } from '../models/habit';
 import { CreateHabit } from '../dto/createHabit';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class HabitService {
-  private readonly baseUrl = 'http://localhost:8080/api/habits';
+  private readonly baseUrl = environment.API_BASE_URL+'/api/habits';
 
   constructor(private http: HttpClient) {}
 

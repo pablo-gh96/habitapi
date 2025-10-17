@@ -32,7 +32,7 @@ export class LoginComponent {
     this.auth.login(username ?? '', password ?? '').subscribe({
       next: (res) => {
         const myUsername = sessionStorage.getItem('username');
-        this.router.navigate(['/', myUsername]);
+        this.router.navigate(['/profile']);
       },
       error: (err) => {
         const text = err?.error?.error ?? 'Credenciales inválidas';

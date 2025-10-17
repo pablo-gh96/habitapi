@@ -3,7 +3,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PublicCalendarComponent } from './public-calendar.component';
 import { UsersService, UserSummary } from '../services/user.services';
-import { from } from 'rxjs';
+import { from } from 'rxjs';  
+import { Router, RouterModule } from '@angular/router';
 
 type UserView = { id: number; name: string; avatarUrl: string };
 
@@ -12,13 +13,22 @@ type UserView = { id: number; name: string; avatarUrl: string };
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, PublicCalendarComponent],
+  imports: [CommonModule, PublicCalendarComponent, RouterModule],
   template: `
   <div class="min-h-screen bg-gray-50">
-    <header class="mx-auto max-w-5xl px-4 pt-10">
-      <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Calendarios (feed)</h1>
-      <p class="text-sm text-gray-500">Todos los usuarios</p>
-    </header>
+    <header class="mx-auto max-w-5xl px-4 pt-10 flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Calendarios Timeline</h1>
+    <p class="text-sm text-gray-500">Todos los usuarios</p>
+  </div>
+
+  <button
+    routerLink="/profile"
+    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+  >
+    Mi perfil
+  </button>
+</header>
 
     <main class="mx-auto max-w-5xl px-4 py-6 space-y-6">
       <app-public-calendar
@@ -33,9 +43,9 @@ type UserView = { id: number; name: string; avatarUrl: string };
 })
 export class FeedPageComponent implements OnInit {
   private usersSvc = inject(UsersService);
-
+  username = sessionStorage.getItem('username') || '';
   users: UserView[] = [];
-
+  
   ngOnInit(): void {
     this.usersSvc.getOthers().subscribe({
       next: (list: UserSummary[]) => {

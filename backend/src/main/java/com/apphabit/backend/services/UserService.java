@@ -28,4 +28,6 @@ public interface UserService {
     Long getIdFromUsername(String username);
     
     List<UserResponse> findAllIdsExcept();
+    
+    UserResponse getUserFromUsername(String username);
 }

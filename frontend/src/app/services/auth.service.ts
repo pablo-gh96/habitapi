@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Credentials {
   username: string;
@@ -14,7 +15,7 @@ export interface Credentials {
 export class AuthService {
   private http = inject(HttpClient);
   
-  private baseUrl = 'http://localhost:8080';
+  private baseUrl = environment.API_BASE_URL;
 
   register(body: Credentials): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/users`, body);

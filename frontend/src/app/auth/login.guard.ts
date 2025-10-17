@@ -12,7 +12,7 @@ export class LoginGuard implements CanActivate {
 
     if (token) {
       const myUsername = sessionStorage.getItem('username');
-      this.router.navigate(['/', myUsername]);
+      this.router.navigate(['/profile']);
       return false;
     }
     return true;

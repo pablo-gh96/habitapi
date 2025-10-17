@@ -130,6 +130,11 @@ public class HabitService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Habit not found with id " + habitId + " for user " + user.getId()));
 
+        // Comprueba si el hábito pertenece al usuario autenticado
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("No tienes permisos para modificar este hábito");
+        }
+        
         Status current = habit.getStatus();
         Status next = switch (current) {
             case UNDEFINED -> Status.DONE;
@@ -148,10 +153,13 @@ public class HabitService {
     @Transactional
     public void deleteHabit(Long habitId) {
     	User user = getUser();
-    	Long userId = user.getId();
-        if (!habitRepository.existsByIdAndUserId(habitId, userId)) {
-            throw new IllegalArgumentException(
-                    "Habit not found with id " + habitId + " for user " + userId);
+    	
+    	Habit habit = habitRepository.findByIdAndUserId(habitId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Habit not found with id " + habitId + " for user " + user.getId()));
+    	
+    	if (!habit.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("No tienes permisos para modificar este hábito");
         }
         habitRepository.deleteById(habitId);
     }
@@ -171,6 +179,14 @@ public class HabitService {
         // Opción A: obtener ids y borrar en batch (mantiene tu patrón original)
         var ids = habitRepository.findIdsByUserIdAndTitle(user.getId(), t);
         if (ids.isEmpty()) return 0L;
+        for (Long id : ids) {
+            Habit habit = habitRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Habit no encontrado con id " + id));
+
+            if (!habit.getUser().getId().equals(user.getId())) {
+                throw new SecurityException("No tienes permisos para acceder al hábito con id " + id);
+            }
+        }
         habitRepository.deleteAllByIdInBatch(ids);
         return ids.size();
 

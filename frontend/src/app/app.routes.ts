@@ -9,9 +9,10 @@ import { NotFoundComponent } from './not-found/not-found.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'register', component: RegisterComponent },
-  { path: '', component: FeedPageComponent , canActivate: [AuthGuard]},
+  { path: 'tl', component: FeedPageComponent , canActivate: [AuthGuard]},
+  { path: 'profile', component: ProfilePageComponent, canActivate: [AuthGuard] },
   { path: 'not-found', component: NotFoundComponent },
-  { path: ':username', component: ProfilePageComponent, canActivate: [AuthGuard] },
-  
+  { path: '**', component: NotFoundComponent, canActivate: [LoginGuard] },
 ];

@@ -111,6 +111,20 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado: " + username));
     }
     
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserFromUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("El nombre de usuario no puede ser nulo o vacío");
+        }
+
+        return repository.findByUsername(username).map(u->new UserResponse(u.getId(), 
+    			u.getUsername(),
+                u.getName(),
+                u.getLastname(),
+                u.getEmail()))
+                .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado: " + username));
+    }
 
     @Transactional(readOnly = true)
     public List<UserResponse> findAllIdsExcept() {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface UserSummary {
   id: number;
@@ -11,7 +12,7 @@ export interface UserSummary {
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
-  private readonly baseUrl = 'http://localhost:8080/api/users';
+  private readonly baseUrl = environment.API_BASE_URL+'/api/users';
 
   constructor(private http: HttpClient) {}
 
@@ -26,5 +27,9 @@ export class UsersService {
 
   getIdByUsername(username: string): Observable<{id: number}> {
     return this.http.get<{id: number}>(`${this.baseUrl}/username/${username}/id`);
-  }  
+  } 
+  
+  getUserByUsername(username: string): Observable<UserSummary> {
+    return this.http.get<UserSummary>(`${this.baseUrl}/username/${username}`);
+  }
 }

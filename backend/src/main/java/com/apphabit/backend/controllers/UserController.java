@@ -109,6 +109,16 @@ public class UserController {
         }
     }
     
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUserfromUsername(@PathVariable String username){
+    	try {
+    		UserResponse user = service.getUserFromUsername(username);
+            return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
     @GetMapping("/ids-others")
     public ResponseEntity<?> getOtherUserIds() {
 

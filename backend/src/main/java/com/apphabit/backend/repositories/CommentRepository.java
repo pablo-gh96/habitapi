@@ -14,7 +14,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 	List<Comment> findByToUserIdAndTargetDateOrderByCreatedAtAsc(Long userId, LocalDate targetDate);
 	
 	@Query("""
-		      select new miapp.habitapi.dto.CommentResponse(
+		      select new com.apphabit.backend.models.CommentResponse(
 		        c.id,
 		        c.message,
 		        c.createdAt,

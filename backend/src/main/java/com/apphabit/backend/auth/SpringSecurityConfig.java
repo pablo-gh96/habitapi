@@ -67,7 +67,12 @@ public class SpringSecurityConfig {
     CorsConfigurationSource configurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(Arrays.asList("*"));
-        config.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:4200",
+        		"http://nginxfrontend",       // 👈 dentro de red docker
+                "http://nginxfrontendv1",     // 👈 si ese es tu container_name
+                "http://springboot-app",      // 👈 opcional, por si haces peticiones entre contenedores
+                "http://frontend",            // 👈 por si cambias el nombre
+                "http://nginxfrontend:80"));
         config.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
