@@ -44,16 +44,8 @@ public class SpringSecurityConfig {
 
         return http.authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/habits").hasRole("USER")
-                .requestMatchers(HttpMethod.PUT, "/api/habits/{id}/status").hasRole("USER")
-                .requestMatchers(HttpMethod.DELETE, "/by-title").hasRole("USER")
-                .requestMatchers(HttpMethod.DELETE, "/api/habits/{id}").hasRole("USER")
-                .requestMatchers(HttpMethod.GET, "/api/habits").hasRole("USER")
-                .requestMatchers(HttpMethod.GET, "/api/users/ids-others").hasRole("USER")
-                .requestMatchers(HttpMethod.GET, "/api/users/username/{username}/id").hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/api/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
                 .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configurationSource()))
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
@@ -72,8 +64,9 @@ public class SpringSecurityConfig {
                 "http://nginxfrontendv1",     // 👈 si ese es tu container_name
                 "http://springboot-app",      // 👈 opcional, por si haces peticiones entre contenedores
                 "http://frontend",            // 👈 por si cambias el nombre
+                "http://47.63.186.50:4440",
                 "http://nginxfrontend:80"));
-        config.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE"));
+        config.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
 
