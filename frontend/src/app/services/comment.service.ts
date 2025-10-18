@@ -4,10 +4,11 @@ import { Observable } from 'rxjs';
 import { Comment } from '../models/comment';
 import { CreateComment } from '../dto/CreateComment';
 import { CommentResponse } from '../dto/commentResponse';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CommentService {
-  private readonly baseUrl = 'http://localhost:8080/api/comments';
+  private readonly baseUrl = environment.API_BASE_URL+'/api/comments';
 
   constructor(private http: HttpClient) {}
 

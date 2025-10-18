@@ -32,11 +32,12 @@ export class LoginComponent {
     this.auth.login(username ?? '', password ?? '').subscribe({
       next: (res) => {
         const myUsername = sessionStorage.getItem('username');
-        this.router.navigate(['/profile']);
+        this.router.navigate(['/tl']);
       },
       error: (err) => {
         const text = err?.error?.error ?? 'Credenciales inválidas';
         this.serverMsg.set({ type: 'error', text });
+        this.loading.set(false);
       },
       complete: () => this.loading.set(false),
     });
