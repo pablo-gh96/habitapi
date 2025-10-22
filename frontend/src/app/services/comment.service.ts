@@ -22,4 +22,8 @@ export class CommentService {
   create(body: CreateComment): Observable<Comment> {
     return this.http.post<Comment>(this.baseUrl, body);
   }
+
+  getCountForDay(day: string): Observable<number> {
+  return this.http.get<number>(`${this.baseUrl}/count?day=${day}`);
+}
 }

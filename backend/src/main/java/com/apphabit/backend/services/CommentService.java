@@ -36,6 +36,11 @@ public class CommentService {
     }
     
     @Transactional
+    public long getNumberOfComments(LocalDate day) {
+        return commentRepo.countByDay(day);
+    }
+    
+    @Transactional
     public Comment create(Long toUserId, LocalDate targetDate, String message) {
         if (toUserId == null) {
             throw new IllegalArgumentException("toUserId are required");
@@ -79,4 +84,6 @@ public class CommentService {
     	        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
 }
+
+
 

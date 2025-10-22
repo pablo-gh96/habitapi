@@ -1,52 +1,3 @@
-<div class="min-h-screen bg-gray-50">
-  <!-- Cabecera de perfil -->
-  <header class="mx-auto max-w-5xl px-4 pt-10">
-    <div class="flex items-center gap-4">
-      <img
-        [src]="avatarUrl"
-        alt="avatar"
-        class="h-16 w-16 rounded-2xl shadow-sm ring-1 ring-gray-200"
-      />
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-          Perfil de {{ username }}
-        </h1>
-        <p class="text-sm text-gray-500">Calendario personal</p>
-      </div>
-    </div>
-
-  <div class="mb-4 flex justify-end">
-    <button
-    (click)="logout()"
-    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-    </svg>
-    <span>Logout</span>
-  </button>
-  </div>
-  </header>
-
-  <main class="mx-auto max-w-5xl px-4 py-8">
-    <div class="mb-4 flex justify-between items-center">
-      <button
-        routerLink="/tl"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-      >
-        Timeline
-      </button>
-
-      <button
-        (click)="openCreateModal()"
-        class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-800 active:scale-[0.98]"
-      >
-        + Nuevo hábito
-      </button>
-    </div>
-
     <!-- Calendario -->
     <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
       <!-- Controles de mes -->
@@ -92,7 +43,7 @@
               </div>
 
               <!-- Hábitos del día -->
-              <div class="flex flex-wrap gap-1">
+              <div class="flex flex-wrap gap-1 pb-6">
                 <ng-container *ngFor="let h of getHabitsFor(day.date)">
                   <span
                     class="inline-flex h-6 w-6 items-center justify-center rounded-md text-xs ring-1"
@@ -107,6 +58,13 @@
 
               <!-- Botones abajo a la derecha: 💬 comentarios + tareas -->
               <div class="absolute bottom-1 right-1 flex gap-1">
+                <!-- Contador de comentarios -->
+                <span
+                *ngIf="getCommentCount(day.date) > 0"
+                class="text-[10px] font-semibold text-gray-700 bg-white rounded-full px-1.5 py-0.5 ring-1 ring-gray-300"
+                >
+                {{ getCommentCount(day.date) }}
+                </span>
                 <button
                   type="button"
                   (click)="openCommentsModal(day.date)"
@@ -118,6 +76,7 @@
                 </button>
 
                 <button
+                  *ngIf="fromProfilePage"
                   type="button"
                   (click)="openDayModal(day.date)"
                   class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100 active:scale-[0.98]"
@@ -132,74 +91,8 @@
         </ng-container>
       </div>
     </div>
-  </main>
 
-  <!-- Modal para crear hábito -->
-  <div *ngIf="showCreateModal()" class="fixed inset-0 z-50">
-    <div class="absolute inset-0 bg-black/40" (click)="closeCreateModal()"></div>
-    <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
-      <form
-        [formGroup]="createForm"
-        (ngSubmit)="submitCreate()"
-        class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200"
-      >
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-gray-900">Nuevo hábito</h2>
-          <button type="button" (click)="closeCreateModal()" aria-label="Cerrar"
-                  class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50">
-            &times;
-          </button>
-        </div>
-
-        <label class="mb-2 block text-sm font-medium text-gray-700">Título</label>
-        <input
-          formControlName="title"
-          type="text"
-          placeholder="Ej. Hacer ejercicio"
-          class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-        />
-
-        <label class="mb-2 block text-sm font-medium text-gray-700">Icono</label>
-        <input
-          formControlName="icon"
-          type="text"
-          placeholder="Ej. 💪  o  dumbbell"
-          class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-        />
-
-        <label class="mb-2 block text-sm font-medium text-gray-700">Fecha</label>
-        <input
-          formControlName="date"
-          type="date"
-          class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-        />
-
-        <label class="mb-2 block text-sm font-medium text-gray-700">Repetición</label>
-        <select
-          formControlName="repeat"
-          class="mb-5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
-        >
-          <option value="once">Una vez</option>
-          <option value="daily">Todos los días</option>
-          <option value="weekly">Semanal</option>
-          <option value="monthly">Mensual</option>
-        </select>
-
-        <div class="flex justify-end gap-2">
-          <button type="button" (click)="closeCreateModal()"
-                  class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" [disabled]="createForm.invalid"
-                  class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
-            Crear
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal: Tareas del día -->
+    <!-- Modal: Tareas del día -->
   <div *ngIf="showDayModal()" class="fixed inset-0 z-50">
     <div class="absolute inset-0 bg-black/40" (click)="closeDayModal()"></div>
     <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
@@ -364,4 +257,3 @@
       </div>
     </div>
   </div>
-</div>

@@ -5,6 +5,7 @@ import com.apphabit.backend.models.CommentResponse;
 import com.apphabit.backend.entities.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,5 +30,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 		        and c.targetDate = :day
 		      order by c.createdAt asc
 		    """)
-		    List<CommentResponse> findDayCommentsForUser(Long userId, LocalDate day);
+	List<CommentResponse> findDayCommentsForUser(Long userId, LocalDate day);
+	
+	@Query("SELECT COUNT(c) FROM Comment c WHERE c.targetDate = :day")
+    long countByDay(@Param("day") LocalDate day);
 }

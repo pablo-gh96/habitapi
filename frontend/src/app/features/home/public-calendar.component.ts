@@ -1,10 +1,10 @@
 import { Component, Input, OnInit, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { HabitService } from '../services/habit.services';
-import { Habit } from '../models/habit';
-import { CommentService } from '../services/comment.service';
-import { CommentResponse} from '../dto/commentResponse';
+import { HabitService } from '../../services/habit.services';
+import { Habit } from '../../models/habit';
+import { CommentService } from '../../services/comment.service';
+import { CommentResponse} from '../../dto/commentResponse';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 

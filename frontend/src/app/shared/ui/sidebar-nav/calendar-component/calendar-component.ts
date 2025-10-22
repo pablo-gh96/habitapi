@@ -1,14 +1,14 @@
 // src/app/profile-page/profile-page.component.ts
-import { Component, computed, effect, signal, inject, OnInit } from '@angular/core';
+import { Component, computed, effect, signal, inject, OnInit, Input, SimpleChanges, booleanAttribute  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { Habit } from '../models/habit';
-import { HabitService } from '../services/habit.services';
-import { CommentService} from '../services/comment.service';
-import { CreateComment } from '../dto/CreateComment';
-import { CommentResponse } from '../dto/commentResponse';
+import { Habit } from '../../../../models/habit';
+import { HabitService } from '../../../../services/habit.services';
+import { CommentService} from '../../../../services/comment.service';
+import { CreateComment } from '../../../../dto/CreateComment';
+import { CommentResponse } from '../../../../dto/commentResponse';
 import { ActivatedRoute } from '@angular/router';
-import { UsersService } from '../services/user.services';
+import { UsersService } from '../../../../services/user.services';
 import { Router, RouterModule } from '@angular/router';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
@@ -17,28 +17,28 @@ type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
 
 @Component({
-  selector: 'app-profile-page',
+  selector: 'app-calendar-component',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './profile-page.component.html'
+  templateUrl: './calendar-component.html'
 })
-export class ProfilePageComponent implements OnInit {
+export class CalendarComponent implements OnInit {
 
-  private USER_ID = 0;
+  @Input() USER_ID!: number;
   
-  logout(): void {
-    // Borra el token del almacenamiento local
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    sessionStorage.clear();
+  @Input() refreshTrigger = 0; // 👈 número o cualquier tipo reactivo
 
-    // Redirige al login
-    this.router.navigate(['/login']);
+  @Input() fromProfilePage: boolean = false;
+  
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['refreshTrigger'] && !changes['refreshTrigger'].firstChange) {
+      this.reloadCurrentMonth(); // 🔁 vuelve a cargar los hábitos
+    }
   }
+
   private readonly route = inject(ActivatedRoute);
   username = sessionStorage.getItem('username') || '';
   private router = inject(Router);
-  readonly avatarUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=' + this.username;
 
   // --- Calendario base ---
   readonly baseDate = signal(startOfMonth(new Date()));
@@ -72,7 +72,7 @@ export class ProfilePageComponent implements OnInit {
   // --- Modales de borrado ---
   readonly showConfirmModal = signal(false);
   private habitToDelete: Habit | null = null;
-
+  
   // --- Comentarios del día ---
   readonly showCommentsModal = signal(false);
   readonly comments = signal<CommentResponse[]>([]);
@@ -96,7 +96,6 @@ export class ProfilePageComponent implements OnInit {
       },
         error: (err) => {
         console.error('Usuario no encontrado:', err);
-        this.router.navigate(['/not-found']); // redirige a página 404
         }
     });
     // Form crear hábito
@@ -138,6 +137,7 @@ export class ProfilePageComponent implements OnInit {
           map.set(key, arr);
         }
         this.habitsByDate.set(map);
+        this.loadMonthCommentCounts(year, month);
       },
       error: (err) => {
         console.error('❌ Error cargando hábitos:', err);
@@ -282,6 +282,32 @@ export class ProfilePageComponent implements OnInit {
   });
   
 }
+
+    private readonly commentCountByDay = signal<Map<string, number>>(new Map());
+
+    private loadMonthCommentCounts(year: number, month: number): void {
+    const map = new Map<string, number>();
+    const matrix = buildMonthMatrix(new Date(year, month - 1, 1)); // ya tienes buildMonthMatrix
+    const allDays = matrix.flat().filter(d => d.inCurrentMonth);
+
+    for (const day of allDays) {
+        const key = toLocalKey(day.date);
+
+        this.commentService.getCountForDay(key).subscribe({
+        next: (count) => {
+            map.set(key, count);
+            // cada vez que llega uno nuevo, actualizamos la señal
+            this.commentCountByDay.set(new Map(map));
+        },
+        error: (err) => console.error('❌ Error al cargar count para', key, err)
+        });
+    }
+    }
+
+    getCommentCount(date: Date): number {
+    const key = toLocalKey(date);
+    return this.commentCountByDay().get(key) ?? 0;
+    }
   
 }
 

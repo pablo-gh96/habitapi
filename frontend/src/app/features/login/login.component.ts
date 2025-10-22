@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -32,7 +32,7 @@ export class LoginComponent {
     this.auth.login(username ?? '', password ?? '').subscribe({
       next: (res) => {
         const myUsername = sessionStorage.getItem('username');
-        this.router.navigate(['/tl']);
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         const text = err?.error?.error ?? 'Credenciales inválidas';

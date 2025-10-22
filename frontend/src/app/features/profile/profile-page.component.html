@@ -1,0 +1,103 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Cabecera de perfil -->
+  <header class="mx-auto max-w-5xl px-4 pt-10">
+    <div class="flex items-center gap-4">
+      <img
+        [src]="avatarUrl"
+        alt="avatar"
+        class="h-16 w-16 rounded-2xl shadow-sm ring-1 ring-gray-200"
+      />
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
+          Perfil de {{ username }}
+        </h1>
+        <p class="text-sm text-gray-500">Calendario personal</p>
+      </div>
+    </div>
+
+  
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-8">
+    <div class="mb-4 flex justify-between items-center">
+      <button
+        (click)="openCreateModal()"
+        class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-800 active:scale-[0.98]"
+      >
+        + Nuevo hábito
+      </button>
+    </div>
+
+    <app-calendar-component [USER_ID]="USER_ID"
+    [refreshTrigger]="refreshCounter"
+    [fromProfilePage]="true"
+    ></app-calendar-component>
+  </main>
+
+  <!-- Modal para crear hábito -->
+  <div *ngIf="showCreateModal()" class="fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/40" (click)="closeCreateModal()"></div>
+    <div class="absolute inset-0 mx-auto my-10 flex max-w-md items-start justify-center px-4">
+      <form
+        [formGroup]="createForm"
+        (ngSubmit)="submitCreate()"
+        class="w-full rounded-2xl bg-white p-5 shadow-lg ring-1 ring-gray-200"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-900">Nuevo hábito</h2>
+          <button type="button" (click)="closeCreateModal()" aria-label="Cerrar"
+                  class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-50">
+            &times;
+          </button>
+        </div>
+
+        <label class="mb-2 block text-sm font-medium text-gray-700">Título</label>
+        <input
+          formControlName="title"
+          type="text"
+          placeholder="Ej. Hacer ejercicio"
+          class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+        />
+
+        <label class="mb-2 block text-sm font-medium text-gray-700">Icono</label>
+        <input
+          formControlName="icon"
+          type="text"
+          placeholder="Ej. 💪  o  dumbbell"
+          class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+        />
+
+        <label class="mb-2 block text-sm font-medium text-gray-700">Fecha</label>
+        <input
+          formControlName="date"
+          type="date"
+          class="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+        />
+
+        <label class="mb-2 block text-sm font-medium text-gray-700">Repetición</label>
+        <select
+          formControlName="repeat"
+          class="mb-5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-900"
+        >
+          <option value="once">Una vez</option>
+          <option value="daily">Todos los días</option>
+          <option value="weekly">Semanal</option>
+          <option value="monthly">Mensual</option>
+        </select>
+
+        <div class="flex justify-end gap-2">
+          <button type="button" (click)="closeCreateModal()"
+                  class="rounded-xl px-4 py-2 text-sm ring-1 ring-gray-300 hover:bg-gray-50">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="createForm.invalid"
+                  class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
+            Crear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  
+</div>

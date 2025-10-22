@@ -1,0 +1,36 @@
+<nav class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-gray-200">
+  <ul class="space-y-2">
+    <!-- Inicio -->
+    <li>
+      <a
+        routerLink="/home"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]"
+      >
+        <!-- ícono casa -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10.5l9-7 9 7M5 10v10a1 1 0 001 1h4m4 0h4a1 1 0 001-1V10m-10 11v-6a1 1 0 011-1h4a1 1 0 011 1v6" />
+        </svg>
+        <span>Inicio</span>
+      </a>
+    </li>
+
+    <!-- Perfil -->
+    <li>
+      <a
+        routerLink="/profile"
+        routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]"
+      >
+        <!-- ícono usuario -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>Perfil</span>
+      </a>
+    </li>
+  </ul>
+</nav>

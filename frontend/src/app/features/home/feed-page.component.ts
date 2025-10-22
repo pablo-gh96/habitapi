@@ -1,8 +1,8 @@
 // src/app/feed/feed-page.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PublicCalendarComponent } from './public-calendar.component';
-import { UsersService, UserSummary } from '../services/user.services';
+import { CalendarComponent } from '../../shared/ui/sidebar-nav/calendar-component/calendar-component';
+import { UsersService, UserSummary } from '../../services/user.services';
 import { from } from 'rxjs';  
 import { Router, RouterModule } from '@angular/router';
 
@@ -13,7 +13,7 @@ type UserView = { id: number; name: string; avatarUrl: string };
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, PublicCalendarComponent, RouterModule],
+  imports: [CommonModule, CalendarComponent, RouterModule],
   template: `
   <div class="min-h-screen bg-gray-50">
     <header class="mx-auto max-w-5xl px-4 pt-10 flex items-center justify-between">
@@ -22,21 +22,15 @@ type UserView = { id: number; name: string; avatarUrl: string };
     <p class="text-sm text-gray-500">Todos los usuarios</p>
   </div>
 
-  <button
-    routerLink="/profile"
-    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-  >
-    Mi perfil
-  </button>
 </header>
 
     <main class="mx-auto max-w-5xl px-4 py-6 space-y-6">
-      <app-public-calendar
+      <app-calendar-component
         *ngFor="let u of users"
-        [userId]="u.id"
-        [userName]="u.name"
-        [avatarUrl]="u.avatarUrl">
-      </app-public-calendar>
+        [USER_ID]="u.id"
+        [fromProfilePage]="false"
+        >
+      </app-calendar-component>
     </main>
   </div>
   `
