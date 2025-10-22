@@ -44,7 +44,7 @@ public class SpringSecurityConfig {
 
         return http.authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "api/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "api/users").hasRole("ADMIN")
                 .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configurationSource()))
