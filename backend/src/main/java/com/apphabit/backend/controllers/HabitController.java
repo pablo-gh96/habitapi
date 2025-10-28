@@ -86,6 +86,24 @@ public class HabitController {
     }
     
     /**
+     * PATCH /api/habits/{id}/status?userId=1
+     * Cicla el estado del hábito asegurando pertenencia a userId.
+     */
+    @PutMapping("/{id}/title")
+    public ResponseEntity<?> changeTitle(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body
+    ) {
+        try {
+        	String newTitle = body.get("title");
+            int nUpdated = habitService.changeTitle(id, newTitle);
+            return ResponseEntity.ok(Map.of("modificados",nUpdated));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    /**
      * GET /api/habits?userId=1&year=2025&month=10
      * Devuelve todos los hábitos del mes indicado para ese usuario.
      * Si no se pasan year/month, usa el mes actual.
