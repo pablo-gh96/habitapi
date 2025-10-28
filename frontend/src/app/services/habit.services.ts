@@ -43,4 +43,10 @@ export class HabitService {
       .set('title', title);
     return this.http.delete<{ deleted: number }>(`${this.baseUrl}/by-title`, { params });
   }
+  
+  updateTitle(id: number, newTitle: string) {
+    return this.http.post<Habit>(`${this.baseUrl}/${id}/title`, { title: newTitle });
+  }
+  
+  
 }

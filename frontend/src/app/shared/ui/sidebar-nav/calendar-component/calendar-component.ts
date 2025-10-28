@@ -309,6 +309,20 @@ export class CalendarComponent implements OnInit {
     return this.commentCountByDay().get(key) ?? 0;
     }
   
+    onTitleCommit(id: number, rawValue: string) {
+      const newTitle = (rawValue ?? '').trim();
+      if (!newTitle) return;
+
+      this.habitService.updateTitle(id, newTitle).subscribe({
+        next: (updated) => {
+          const habit = this.selectedDayHabits().find(h => h.id === id);
+          if (habit) habit.title = updated.title;
+        },
+        error: (err) => {
+          console.error('Error actualizando título', err);
+        }
+      });
+    }
 }
 
 /* ===== Helpers ===== */

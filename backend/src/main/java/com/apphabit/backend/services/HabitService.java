@@ -146,6 +146,26 @@ public class HabitService {
         habit.setStatus(next);
         return habitRepository.save(habit);
     }
+    
+    @Transactional
+    public Habit changeTitle(Long habitId, String title) {
+    	User user = getUser();
+
+        Habit habit = habitRepository.findByIdAndUserId(habitId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Habit not found with id " + habitId + " for user " + user.getId()));
+
+        // Comprueba si el hábito pertenece al usuario autenticado
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("No tienes permisos para modificar este hábito");
+        }
+        
+        
+        habit.setTitle(title.trim());
+        return habitRepository.save(habit);
+    }
+    
+    
 
     /**
      * Borra un hábito por id, asegurando pertenencia a userId.

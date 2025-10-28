@@ -121,7 +121,13 @@
               >
                 {{ h.icon }}
               </span>
-              <div class="text-sm text-gray-900">{{ h.title }}</div>
+              <input
+                  class="w-48 md:w-64 rounded-lg border border-gray-300 px-3 py-1.5 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  [value]="h.title"
+                  (blur)="onTitleCommit(h.id, $any($event.target).value)"
+                  (keydown.enter)="onTitleCommit(h.id, $any($event.target).value)"
+                />
             </div>
             <button
               type="button"
