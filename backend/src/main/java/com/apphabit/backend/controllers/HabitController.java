@@ -92,12 +92,12 @@ public class HabitController {
     @PutMapping("/{id}/title")
     public ResponseEntity<?> changeTitle(
             @PathVariable Long id,
-            Map<String, String> body
+            @RequestBody Map<String, String> body
     ) {
         try {
         	String newTitle = body.get("title");
-            Habit updated = habitService.changeTitle(id, newTitle);
-            return ResponseEntity.ok(updated);
+            int nUpdated = habitService.changeTitle(id, newTitle);
+            return ResponseEntity.ok(Map.of("modificados",nUpdated));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

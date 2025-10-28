@@ -148,7 +148,7 @@ public class HabitService {
     }
     
     @Transactional
-    public Habit changeTitle(Long habitId, String title) {
+    public int changeTitle(Long habitId, String newTitle) {
     	User user = getUser();
 
         Habit habit = habitRepository.findByIdAndUserId(habitId, user.getId())
@@ -161,8 +161,8 @@ public class HabitService {
         }
         
         
-        habit.setTitle(title.trim());
-        return habitRepository.save(habit);
+        String oldTitle = habit.getTitle();
+        return habitRepository.bulkRenameTitle(user.getId(), oldTitle, newTitle);
     }
     
     

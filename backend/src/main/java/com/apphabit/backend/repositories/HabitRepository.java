@@ -3,7 +3,9 @@ package com.apphabit.backend.repositories;
 
 import com.apphabit.backend.entities.Habit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,5 +33,13 @@ public interface HabitRepository extends JpaRepository<Habit, Long> {
     	    Long userId, LocalDate start, LocalDate end
     	);
 
+    @Modifying
+    @Query("""
+      update Habit h
+         set h.title = :newTitle
+       where h.title = :oldTitle
+         and h.user.id = :userId
+    """)
+    int bulkRenameTitle(Long userId, String oldTitle, String newTitle);
 }
 

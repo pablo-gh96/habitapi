@@ -317,6 +317,7 @@ export class CalendarComponent implements OnInit {
         next: (updated) => {
           const habit = this.selectedDayHabits().find(h => h.id === id);
           if (habit) habit.title = updated.title;
+          this.reloadCurrentMonth();
         },
         error: (err) => {
           console.error('Error actualizando título', err);

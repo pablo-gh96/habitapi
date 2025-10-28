@@ -45,7 +45,7 @@ export class HabitService {
   }
   
   updateTitle(id: number, newTitle: string) {
-    return this.http.post<Habit>(`${this.baseUrl}/${id}/title`, { title: newTitle });
+    return this.http.put<Habit>(`${this.baseUrl}/${id}/title`, { title: newTitle });
   }
   
   
