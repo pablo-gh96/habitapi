@@ -25,11 +25,11 @@
       </div>
 
       <!-- Celdas del calendario -->
-      <div class="mt-2 grid grid-cols-7 gap-2">
+      <div class="mt-3 grid grid-cols-7 gap-3 md:gap-4">
         <ng-container *ngFor="let week of weeks()">
           <ng-container *ngFor="let day of week">
             <div
-              class="relative aspect-square rounded-xl p-2 text-sm transition ring-1"
+              class="relative aspect-square rounded-2xl p-3 text-base transition ring-1"
               [ngClass]="{
                 'bg-white text-gray-900 ring-gray-200': day.inCurrentMonth && !day.isToday,
                 'bg-gray-50 text-gray-400 ring-gray-200': !day.inCurrentMonth,
@@ -46,7 +46,7 @@
               <div class="flex flex-wrap gap-1 pb-6">
                 <ng-container *ngFor="let h of getHabitsFor(day.date)">
                   <span
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-md text-xs ring-1"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-md text-lg ring-1"
                     [ngClass]="statusClasses(h.status)"
                     [title]="h.title"
                     (click)="onHabitClick(h)"
