@@ -25,12 +25,18 @@ type UserView = { id: number; name: string; avatarUrl: string };
 </header>
 
     <main class="mx-auto max-w-7xl px-4 py-6 space-y-6">
-      <app-calendar-component
-        *ngFor="let u of users"
-        [USER_ID]="u.id"
-        [fromProfilePage]="false"
-        >
-      </app-calendar-component>
+      <div *ngFor="let u of users" class="mb-10">
+        <!-- título del usuario -->
+        <h2 class="text-xl font-semibold mb-4 text-gray-900">
+          {{ u.name }}
+        </h2>
+
+        <!-- calendario del usuario -->
+        <app-calendar-component
+          [USER_ID]="u.id"
+          [fromProfilePage]="false">
+        </app-calendar-component>
+      </div>
     </main>
   </div>
   `
@@ -45,7 +51,7 @@ export class FeedPageComponent implements OnInit {
       next: (list: UserSummary[]) => {
         this.users = list.map(u => ({
           id: u.id,
-          name: u.name,
+          name: u.username,
           avatarUrl: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(u.name)}`
         }));
       },
