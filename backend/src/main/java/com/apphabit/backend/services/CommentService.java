@@ -36,8 +36,8 @@ public class CommentService {
     }
     
     @Transactional
-    public long getNumberOfComments(LocalDate day) {
-        return commentRepo.countByDay(day);
+    public long getNumberOfComments(Long userId, LocalDate day) {
+        return commentRepo.countByDayAndToUser(userId, day);
     }
     
     @Transactional

@@ -32,6 +32,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 		    """)
 	List<CommentResponse> findDayCommentsForUser(Long userId, LocalDate day);
 	
-	@Query("SELECT COUNT(c) FROM Comment c WHERE c.targetDate = :day")
-    long countByDay(@Param("day") LocalDate day);
+	@Query("SELECT COUNT(c) FROM Comment c WHERE c.targetDate = :day AND c.toUser.id = :userId")
+	long countByDayAndToUser(@Param("userId") Long userId, @Param("day") LocalDate day);
 }

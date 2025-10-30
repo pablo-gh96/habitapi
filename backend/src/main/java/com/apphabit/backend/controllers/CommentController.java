@@ -62,8 +62,8 @@ public class CommentController {
     }
 
     @GetMapping("/count")
-    public long getNumberOfComments(@RequestParam LocalDate day) {
-        return commentService.getNumberOfComments(day);
+    public long getNumberOfComments(@RequestParam Long userId, @RequestParam LocalDate day) {
+        return commentService.getNumberOfComments(userId, day);
     }
 
 }

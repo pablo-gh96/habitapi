@@ -23,7 +23,7 @@ export class CommentService {
     return this.http.post<Comment>(this.baseUrl, body);
   }
 
-  getCountForDay(day: string): Observable<number> {
-  return this.http.get<number>(`${this.baseUrl}/count?day=${day}`);
+  getCountForDay(day: string, userId: number): Observable<number> {
+  return this.http.get<number>(`${this.baseUrl}/count?day=${day}&userId=${userId}`);
 }
 }

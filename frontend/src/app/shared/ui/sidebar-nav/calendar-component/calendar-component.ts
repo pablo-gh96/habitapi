@@ -90,14 +90,7 @@ export class CalendarComponent implements OnInit {
   ngOnInit(): void {
     const today = toLocalKey(new Date());
     
-    this.userService.getIdByUsername(this.username).subscribe({
-      next: (res) => {
-        this.USER_ID = res.id;
-      },
-        error: (err) => {
-        console.error('Usuario no encontrado:', err);
-        }
-    });
+    
     // Form crear hábito
     this.createForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(80)]],
@@ -293,7 +286,7 @@ export class CalendarComponent implements OnInit {
     for (const day of allDays) {
         const key = toLocalKey(day.date);
 
-        this.commentService.getCountForDay(key).subscribe({
+        this.commentService.getCountForDay(key, this.USER_ID).subscribe({
         next: (count) => {
             map.set(key, count);
             // cada vez que llega uno nuevo, actualizamos la señal
