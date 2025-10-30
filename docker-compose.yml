@@ -6,7 +6,8 @@ services:
       dockerfile: Dockerfile
     container_name: nginxfrontendv1
     ports:
-      - "4200:80" # Cambia esto según sea necesario
+      - "80:80"
+      - "443:443"
     environment:
       API_BASE_URL: http://springboot-app:8080
     depends_on:
