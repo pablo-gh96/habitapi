@@ -2,34 +2,61 @@
   <ul class="space-y-2">
     <!-- Inicio -->
     <li>
-      <a
-        routerLink="/home"
-        [routerLinkActiveOptions]="{ exact: true }"
+      <a routerLink="/home" [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
-        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]"
-      >
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]">
         <!-- ícono casa -->
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 10.5l9-7 9 7M5 10v10a1 1 0 001 1h4m4 0h4a1 1 0 001-1V10m-10 11v-6a1 1 0 011-1h4a1 1 0 011 1v6" />
+            d="M3 10.5l9-7 9 7M5 10v10a1 1 0 001 1h4m4 0h4a1 1 0 001-1V10m-10 11v-6a1 1 0 011-1h4a1 1 0 011 1v6" />
         </svg>
         <span>Inicio</span>
+      </a>
+    </li>
+    <!-- Comidas -->
+    <li>
+      <a routerLink="/comidas" routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]">
+        <!-- ícono tenedor/cuchillo -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span>Comidas</span>
       </a>
     </li>
 
     <!-- Perfil -->
     <li>
-      <a
-        routerLink="/profile"
-        routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
-        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]"
-      >
+      <a routerLink="/profile" routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]">
         <!-- ícono usuario -->
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+            d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        <span>Perfil</span>
+        <span>Hábitos</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/gym" routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 7H4v10h2m12-10h2v10h-2M7 12h10M6 9h2v6H6m10-6h2v6h-10" />
+        </svg>
+        <span>Gimnasio (Próximamente)</span>
+      </a>
+    </li>
+
+    <li>
+      <a routerLink="/stats" routerLinkActive="!bg-gray-900 !text-white !ring-gray-900"
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm ring-1 ring-gray-200 text-gray-700 hover:bg-gray-50 transition active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span>Estadísticas (Próximamente)</span>
       </a>
     </li>
   </ul>

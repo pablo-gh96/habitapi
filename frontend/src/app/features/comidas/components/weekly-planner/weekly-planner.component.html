@@ -1,0 +1,63 @@
+<div class="planner-container">
+
+    <div class="week-controls">
+        <button (click)="previousWeek()">&laquo; Anterior</button>
+        <span class="week-title">Semana del {{ currentDate | date:'dd/MM/yyyy' }}</span>
+        <button (click)="nextWeek()">Siguiente &raquo;</button>
+    </div>
+    <div class="planner-grid" *ngIf="week && week.days">
+        <div class="day-col" *ngFor="let day of daysOfWeek">
+            <h3 class="day-name">{{ day }}</h3>
+            <div class="meal-slot">
+                <label>Desayuno</label>
+                <div class="slot-controls">
+                    <input type="checkbox" [(ngModel)]="week.days[day]!.breakfastCompleted" (change)="savePlan()">
+                    <select [ngModel]="getPlateId(day, 'breakfast')"
+                        (ngModelChange)="setPlateId(day, 'breakfast', $event)">
+                        <option [value]="undefined">--</option>
+                        <option *ngFor="let p of plates" [value]="p.id">{{ p.name }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="meal-slot">
+                <label>Comida</label>
+                <div class="slot-controls">
+                    <input type="checkbox" [(ngModel)]="week.days[day]!.lunchCompleted">
+                    <select [ngModel]="getPlateId(day, 'lunch')" (ngModelChange)="setPlateId(day, 'lunch', $event)">
+                        <option [value]="undefined">--</option>
+                        <option *ngFor="let p of plates" [value]="p.id">{{ p.name }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="meal-slot">
+                <label>Merienda</label>
+                <div class="slot-controls">
+                    <input type="checkbox" [(ngModel)]="week.days[day]!.snackCompleted">
+                    <select [ngModel]="getPlateId(day, 'snack')" (ngModelChange)="setPlateId(day, 'snack', $event)">
+                        <option [value]="undefined">--</option>
+                        <option *ngFor="let p of plates" [value]="p.id">{{ p.name }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="meal-slot">
+
+                <label>Cena</label>
+
+                <div class="slot-controls">
+
+                    <input type="checkbox" [(ngModel)]="week.days[day]!.dinnerCompleted">
+
+                    <select [ngModel]="getPlateId(day, 'dinner')" (ngModelChange)="setPlateId(day, 'dinner', $event)">
+
+                        <option [value]="undefined">--</option>
+
+                        <option *ngFor="let p of plates" [value]="p.id">{{ p.name }}</option>
+
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

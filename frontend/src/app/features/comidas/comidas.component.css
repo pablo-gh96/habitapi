@@ -1,0 +1,13 @@
+.comidas-page {
+    padding: 1rem;
+}
+
+.comidas-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media(min-width: 900px) {
+    /* Side by side on larger screens if desired, or keep stacked as weekly planner is wide */
+}

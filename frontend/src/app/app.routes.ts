@@ -21,6 +21,7 @@ export const routes: Routes = [
     children: [
       { path: 'home', component: FeedPageComponent },
       { path: 'profile', component: ProfilePageComponent },
+      { path: 'comidas', loadComponent: () => import('./features/comidas/comidas.component').then(m => m.ComidasComponent) },
       { path: 'not-found', component: NotFoundComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]

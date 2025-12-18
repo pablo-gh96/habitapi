@@ -1,0 +1,16 @@
+<div class="plate-list-container">
+  <h3>Mis Platos</h3>
+  
+  <div class="add-plate-form">
+    <input [(ngModel)]="newPlateName" placeholder="Nombre del plato" type="text">
+    <input [(ngModel)]="newPlateType" placeholder="Tipo (opcional)" type="text">
+    <button (click)="addPlate()">Añadir</button>
+  </div>
+
+  <ul class="plate-list">
+    <li *ngFor="let plate of plates">
+      <span class="plate-info">{{ plate.name }} <small *ngIf="plate.type">({{ plate.type }})</small></span>
+      <button class="delete-btn" (click)="deletePlate(plate.id)">×</button>
+    </li>
+  </ul>
+</div>
