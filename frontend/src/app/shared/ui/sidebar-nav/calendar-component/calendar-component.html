@@ -14,64 +14,57 @@
   </div>
 
   <div class="grid grid-cols-7 text-center text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-widest">
-    <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+    <div>L</div>
+    <div>M</div>
+    <div>X</div>
+    <div>J</div>
+    <div>V</div>
+    <div>S</div>
+    <div>D</div>
   </div>
 
   <div class="mt-2 grid grid-cols-7 gap-1 sm:gap-3 md:gap-4">
     <ng-container *ngFor="let week of weeks()">
       <ng-container *ngFor="let day of week">
         <div
-          class="relative aspect-square flex flex-col rounded-xl sm:rounded-2xl p-1 sm:p-3 text-sm transition ring-1 min-h-[60px] sm:min-h-0"
+          class="relative flex flex-col rounded-xl sm:rounded-2xl p-1.5 sm:p-3 text-sm transition ring-1 min-h-[80px] sm:min-h-[120px]"
           [ngClass]="{
             'bg-white text-gray-900 ring-gray-200': day.inCurrentMonth && !day.isToday,
             'bg-gray-50 text-gray-400 ring-gray-100': !day.inCurrentMonth,
             'bg-white text-gray-900 ring-2 ring-black': day.isToday
-          }"
-          [title]="day.date | date : 'fullDate'"
-          (click)="isMobile() ? openDayModal(day.date) : null"
-        >
-          <div class="mb-0.5">
-            <span class="text-[11px] sm:text-base font-semibold">{{ day.date | date : 'd' }}</span>
+          }" (click)="isMobile() ? openDayModal(day.date) : null">
+          <div class="mb-1">
+            <span class="text-[11px] sm:text-base font-bold">{{ day.date | date : 'd' }}</span>
           </div>
 
-          <div class="flex flex-wrap gap-0.5 overflow-hidden">
+          <div class="flex flex-wrap gap-1 mb-8">
             <ng-container *ngFor="let h of getHabitsFor(day.date)">
               <span
-                class="inline-flex h-5 w-5 sm:h-9 sm:w-9 items-center justify-center rounded-md text-[10px] sm:text-lg ring-1 transition-transform active:scale-90"
-                [ngClass]="statusClasses(h.status)"
-                [title]="h.title"
-                (click)="$event.stopPropagation(); onHabitClick(h)"
-              >
+                class="inline-flex h-5 w-5 sm:h-10 sm:w-10 items-center justify-center rounded-md sm:rounded-lg text-[10px] sm:text-lg font-bold ring-1 transition-transform active:scale-90"
+                [ngClass]="statusClasses(h.status)" (click)="$event.stopPropagation(); onHabitClick(h)">
                 {{ h.icon }}
               </span>
             </ng-container>
           </div>
 
-          <div class="mt-auto">
+          <div class="absolute bottom-1.5 right-1.5 left-1.5">
             <div class="hidden sm:flex justify-end gap-1">
-              <button
-                type="button"
-                (click)="$event.stopPropagation(); openCommentsModal(day.date)"
-                class="relative flex h-7 w-7 items-center justify-center rounded-full bg-gray-50 text-xs ring-1 ring-gray-200 hover:bg-gray-100 transition"
-              >
+              <button type="button" (click)="$event.stopPropagation(); openCommentsModal(day.date)"
+                class="relative flex h-7 w-7 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-xs ring-1 ring-gray-200 hover:bg-gray-100 shadow-sm transition">
                 💬
-                <span *ngIf="getCommentCount(day.date) > 0" 
-                      class="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-indigo-600 text-[8px] text-white">
+                <span *ngIf="getCommentCount(day.date) > 0"
+                  class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-indigo-600 text-[9px] text-white font-bold">
                   {{ getCommentCount(day.date) }}
                 </span>
               </button>
 
-              <button
-                *ngIf="fromProfilePage"
-                type="button"
-                (click)="$event.stopPropagation(); openDayModal(day.date)"
-                class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-50 text-xs ring-1 ring-gray-200 hover:bg-gray-100 transition"
-              >
+              <button *ngIf="fromProfilePage" type="button" (click)="$event.stopPropagation(); openDayModal(day.date)"
+                class="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-xs ring-1 ring-gray-200 hover:bg-gray-100 shadow-sm transition">
                 ⋮
               </button>
             </div>
 
-            <div class="flex sm:hidden justify-center gap-1.5 pb-1">
+            <div class="flex sm:hidden justify-center gap-1.5 pb-0.5">
               <div *ngIf="getCommentCount(day.date) > 0" class="h-1.5 w-1.5 rounded-full bg-indigo-600 shadow-sm"></div>
               <div *ngIf="fromProfilePage" class="h-1.5 w-1.5 rounded-full bg-gray-400 shadow-sm"></div>
             </div>
@@ -82,14 +75,15 @@
   </div>
 </div>
 
-<div *ngIf="showDayModal() || showCommentsModal() || showConfirmModal()" 
-     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-  
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" 
-       (click)="closeDayModal(); closeCommentsModal(); closeConfirmDelete()"></div>
+<div *ngIf="showDayModal() || showCommentsModal() || showConfirmModal()"
+  class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
 
-  <div class="relative w-full max-w-lg transform rounded-t-3xl sm:rounded-2xl bg-white p-6 shadow-2xl transition-all animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 max-h-[90vh] overflow-y-auto">
-    
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+    (click)="closeDayModal(); closeCommentsModal(); closeConfirmDelete()"></div>
+
+  <div
+    class="relative w-full max-w-lg transform rounded-t-3xl sm:rounded-2xl bg-white p-6 shadow-2xl transition-all max-h-[90vh] overflow-y-auto">
+
     <div class="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-300 sm:hidden"></div>
 
     <div *ngIf="showDayModal()">
@@ -98,16 +92,19 @@
         <button (click)="closeDayModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
       </div>
       <ul class="space-y-2">
-        <li *ngFor="let h of selectedDayHabits()" class="flex items-center justify-between rounded-lg border p-2 bg-gray-50">
-          <div class="flex items-center gap-2 flex-1">
-            <span class="h-7 w-7 flex items-center justify-center rounded-md ring-1 bg-white" [ngClass]="statusClasses(h.status)">{{ h.icon }}</span>
-            <input class="bg-transparent text-sm w-full outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1" 
-                   [value]="h.title" (blur)="onTitleCommit(h.id, $any($event.target).value)">
+        <li *ngFor="let h of selectedDayHabits()"
+          class="flex items-center justify-between rounded-lg border p-2 bg-gray-50">
+          <div class="flex items-center gap-2 flex-1 text-left">
+            <span class="h-7 w-7 flex items-center justify-center rounded-md ring-1 bg-white"
+              [ngClass]="statusClasses(h.status)">{{ h.icon }}</span>
+            <input class="bg-transparent text-sm w-full outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1"
+              [value]="h.title" (blur)="onTitleCommit(h.id, $any($event.target).value)">
           </div>
           <button (click)="openConfirmDelete(h)" class="ml-2 text-xs">❌</button>
         </li>
       </ul>
-      <button (click)="closeDayModal()" class="w-full mt-4 py-2 bg-gray-100 rounded-xl text-sm font-medium">Cerrar</button>
+      <button (click)="closeDayModal()"
+        class="w-full mt-4 py-2 bg-gray-100 rounded-xl text-sm font-medium">Cerrar</button>
     </div>
 
     <div *ngIf="showCommentsModal()">
@@ -115,15 +112,19 @@
         <h2 class="text-lg font-semibold text-gray-900">Comentarios</h2>
         <button (click)="closeCommentsModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
       </div>
-      <div class="space-y-2 mb-4">
+      <div class="space-y-2 mb-4 text-left">
         <div *ngFor="let c of comments()" class="p-2 bg-indigo-50 rounded-lg text-sm border border-indigo-100">
           <p class="text-gray-800">{{ c.message }}</p>
-          <span class="text-[10px] text-indigo-400 font-bold uppercase">{{ c.fromUserName }} • {{ c.createdAt | date:'HH:mm' }}</span>
+          <span class="text-[10px] text-indigo-400 font-bold uppercase">{{ c.fromUserName }} • {{ c.createdAt |
+            date:'HH:mm' }}</span>
         </div>
       </div>
       <form [formGroup]="commentForm" (ngSubmit)="sendComment()">
-        <textarea formControlName="message" rows="2" class="w-full rounded-xl border p-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Escribe algo..."></textarea>
-        <button type="submit" [disabled]="commentForm.invalid || sendingComment()" class="w-full mt-2 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold">
+        <textarea formControlName="message" rows="2"
+          class="w-full rounded-xl border p-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Escribe algo..."></textarea>
+        <button type="submit" [disabled]="commentForm.invalid || sendingComment()"
+          class="w-full mt-2 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold">
           {{ sendingComment() ? 'Enviando...' : 'Enviar' }}
         </button>
       </form>
@@ -131,10 +132,12 @@
 
     <div *ngIf="showConfirmModal()">
       <h2 class="text-lg font-semibold text-gray-900 mb-2">¿Eliminar hábito?</h2>
-      <p class="text-sm text-gray-600 mb-4">Esta acción no se puede deshacer.</p>
+      <p class="text-sm text-gray-600 mb-4 text-left">Esta acción no se puede deshacer.</p>
       <div class="grid grid-cols-2 gap-2">
-        <button (click)="confirmDeleteSingle()" class="py-2 border rounded-xl text-sm font-medium">Solo esta vez</button>
-        <button (click)="confirmDeleteAll()" class="py-2 bg-red-600 text-white rounded-xl text-sm font-medium">Todas las veces</button>
+        <button (click)="confirmDeleteSingle()" class="py-2 border rounded-xl text-sm font-medium">Solo esta
+          vez</button>
+        <button (click)="confirmDeleteAll()" class="py-2 bg-red-600 text-white rounded-xl text-sm font-medium">Todas las
+          veces</button>
       </div>
     </div>
 

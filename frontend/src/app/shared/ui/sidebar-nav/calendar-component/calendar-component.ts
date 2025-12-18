@@ -1,10 +1,10 @@
 // src/app/profile-page/profile-page.component.ts
-import { Component, computed, effect, signal, inject, OnInit, Input, SimpleChanges, booleanAttribute  } from '@angular/core';
+import { Component, computed, effect, signal, inject, OnInit, Input, SimpleChanges, booleanAttribute } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Habit } from '../../../../models/habit';
 import { HabitService } from '../../../../services/habit.services';
-import { CommentService} from '../../../../services/comment.service';
+import { CommentService } from '../../../../services/comment.service';
 import { CreateComment } from '../../../../dto/CreateComment';
 import { CommentResponse } from '../../../../dto/commentResponse';
 import { ActivatedRoute } from '@angular/router';
@@ -25,11 +25,11 @@ type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 export class CalendarComponent implements OnInit {
 
   @Input() USER_ID!: number;
-  
+
   @Input() refreshTrigger = 0; // 👈 número o cualquier tipo reactivo
 
   @Input() fromProfilePage: boolean = false;
-  
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['refreshTrigger'] && !changes['refreshTrigger'].firstChange) {
       this.reloadCurrentMonth(); // 🔁 vuelve a cargar los hábitos
@@ -75,7 +75,7 @@ export class CalendarComponent implements OnInit {
   // --- Modales de borrado ---
   readonly showConfirmModal = signal(false);
   private habitToDelete: Habit | null = null;
-  
+
   // --- Comentarios del día ---
   readonly showCommentsModal = signal(false);
   readonly comments = signal<CommentResponse[]>([]);
@@ -88,12 +88,12 @@ export class CalendarComponent implements OnInit {
     private fb: FormBuilder,
     private commentService: CommentService,
     private userService: UsersService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const today = toLocalKey(new Date());
-    
-    
+
+
     // Form crear hábito
     this.createForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(80)]],
@@ -177,10 +177,10 @@ export class CalendarComponent implements OnInit {
 
   statusClasses(status: Habit['status']): string {
     switch (status) {
-      case 'done':       return 'bg-emerald-500 ring-emerald-600 text-white';
-      case 'partially':  return 'bg-amber-400 ring-amber-500 text-gray-900';
-      case 'not_done':   return 'bg-rose-500 ring-rose-600 text-white';
-      default:           return 'bg-gray-300 ring-gray-400 text-gray-800';
+      case 'done': return 'bg-emerald-500 ring-emerald-600 text-gray-900';
+      case 'partially': return 'bg-amber-400 ring-amber-500 text-gray-900';
+      case 'not_done': return 'bg-rose-500 ring-rose-600 text-gray-900';
+      default: return 'bg-gray-300 ring-gray-400 text-gray-800';
     }
   }
 
@@ -247,86 +247,86 @@ export class CalendarComponent implements OnInit {
   }
 
   sendComment() {
-  const msg = this.commentForm.get('message')?.value?.trim();
-  const sel = this.selectedDay();
-  if (!msg || !sel || this.sendingComment()) return;
+    const msg = this.commentForm.get('message')?.value?.trim();
+    const sel = this.selectedDay();
+    if (!msg || !sel || this.sendingComment()) return;
 
-  const body: CreateComment = {
-    message: msg,
-    fromUserId: sessionStorage.getItem('userId') ? Number(sessionStorage.getItem('userId')) : 0,
-    toUserId: this.USER_ID,         // si luego eliges destinatario, cámbialo aquí
-    day: toLocalKey(sel)       // 'YYYY-MM-DD'
-  };
+    const body: CreateComment = {
+      message: msg,
+      fromUserId: sessionStorage.getItem('userId') ? Number(sessionStorage.getItem('userId')) : 0,
+      toUserId: this.USER_ID,         // si luego eliges destinatario, cámbialo aquí
+      day: toLocalKey(sel)       // 'YYYY-MM-DD'
+    };
 
-  this.sendingComment.set(true);
-  this.commentService.create(body).subscribe({
-    next: () => {
-      const dayISO = body.day ?? toLocalKey(this.selectedDay()!);
-      this.commentsLoading.set(true);
-      this.commentService.getForDay(this.USER_ID, dayISO).subscribe({
-        next: (list) => this.comments.set(list),   // ⬅️ lista fresca del backend
-        error: (err) => { console.error('❌ Error recargando comentarios:', err); },
-        complete: () => this.commentsLoading.set(false)
-      });
-      this.commentForm.reset({ message: '' });
-    },
-    error: (err) => {
-      console.error('❌ Error creando comentario:', err);
-      alert('No se pudo enviar el comentario');
-    },
-    complete: () => this.sendingComment.set(false)
-  });
-  
-}
+    this.sendingComment.set(true);
+    this.commentService.create(body).subscribe({
+      next: () => {
+        const dayISO = body.day ?? toLocalKey(this.selectedDay()!);
+        this.commentsLoading.set(true);
+        this.commentService.getForDay(this.USER_ID, dayISO).subscribe({
+          next: (list) => this.comments.set(list),   // ⬅️ lista fresca del backend
+          error: (err) => { console.error('❌ Error recargando comentarios:', err); },
+          complete: () => this.commentsLoading.set(false)
+        });
+        this.commentForm.reset({ message: '' });
+      },
+      error: (err) => {
+        console.error('❌ Error creando comentario:', err);
+        alert('No se pudo enviar el comentario');
+      },
+      complete: () => this.sendingComment.set(false)
+    });
 
-    private readonly commentCountByDay = signal<Map<string, number>>(new Map());
+  }
 
-    private loadMonthCommentCounts(year: number, month: number): void {
+  private readonly commentCountByDay = signal<Map<string, number>>(new Map());
+
+  private loadMonthCommentCounts(year: number, month: number): void {
     const map = new Map<string, number>();
     const matrix = buildMonthMatrix(new Date(year, month - 1, 1)); // ya tienes buildMonthMatrix
     const allDays = matrix.flat().filter(d => d.inCurrentMonth);
 
     for (const day of allDays) {
-        const key = toLocalKey(day.date);
+      const key = toLocalKey(day.date);
 
-        this.commentService.getCountForDay(key, this.USER_ID).subscribe({
+      this.commentService.getCountForDay(key, this.USER_ID).subscribe({
         next: (count) => {
-            map.set(key, count);
-            // cada vez que llega uno nuevo, actualizamos la señal
-            this.commentCountByDay.set(new Map(map));
+          map.set(key, count);
+          // cada vez que llega uno nuevo, actualizamos la señal
+          this.commentCountByDay.set(new Map(map));
         },
         error: (err) => console.error('❌ Error al cargar count para', key, err)
-        });
-    }
-    }
-
-    getCommentCount(date: Date): number {
-    const key = toLocalKey(date);
-    return this.commentCountByDay().get(key) ?? 0;
-    }
-  
-    onTitleCommit(id: number, rawValue: string) {
-      const newTitle = (rawValue ?? '').trim();
-      if (!newTitle) return;
-
-      this.habitService.updateTitle(id, newTitle).subscribe({
-        next: (updated) => {
-          const habit = this.selectedDayHabits().find(h => h.id === id);
-          if (habit) habit.title = updated.title;
-          this.reloadCurrentMonth();
-        },
-        error: (err) => {
-          console.error('Error actualizando título', err);
-        }
       });
     }
+  }
+
+  getCommentCount(date: Date): number {
+    const key = toLocalKey(date);
+    return this.commentCountByDay().get(key) ?? 0;
+  }
+
+  onTitleCommit(id: number, rawValue: string) {
+    const newTitle = (rawValue ?? '').trim();
+    if (!newTitle) return;
+
+    this.habitService.updateTitle(id, newTitle).subscribe({
+      next: (updated) => {
+        const habit = this.selectedDayHabits().find(h => h.id === id);
+        if (habit) habit.title = updated.title;
+        this.reloadCurrentMonth();
+      },
+      error: (err) => {
+        console.error('Error actualizando título', err);
+      }
+    });
+  }
 }
 
 /* ===== Helpers ===== */
 function startOfMonth(d: Date): Date { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function updateMonth(d: Date, delta: number): Date { const nd = new Date(d); nd.setMonth(nd.getMonth() + delta); return startOfMonth(nd); }
-function startOfWeekMonday(d: Date): Date { const day = (d.getDay() + 6) % 7; const sd = new Date(d); sd.setDate(d.getDate() - day); sd.setHours(0,0,0,0); return sd; }
-function isSameDate(a: Date, b: Date): boolean { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function startOfWeekMonday(d: Date): Date { const day = (d.getDay() + 6) % 7; const sd = new Date(d); sd.setDate(d.getDate() - day); sd.setHours(0, 0, 0, 0); return sd; }
+function isSameDate(a: Date, b: Date): boolean { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
 function buildMonthMatrix(base: Date): DayCell[][] {
   const first = startOfMonth(base);
   const start = startOfWeekMonday(first);

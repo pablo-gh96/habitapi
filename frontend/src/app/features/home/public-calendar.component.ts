@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { HabitService } from '../../services/habit.services';
 import { Habit } from '../../models/habit';
 import { CommentService } from '../../services/comment.service';
-import { CommentResponse} from '../../dto/commentResponse';
+import { CommentResponse } from '../../dto/commentResponse';
 
 type DayCell = { date: Date; inCurrentMonth: boolean; isToday: boolean; };
 
@@ -49,7 +49,7 @@ export class PublicCalendarComponent implements OnInit {
     private habitService: HabitService,
     private fb: FormBuilder,
     private commentService: CommentService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // form para enviar comentario
@@ -143,10 +143,10 @@ export class PublicCalendarComponent implements OnInit {
   // estilos
   statusClasses(status: Habit['status']): string {
     switch (status) {
-      case 'done':       return 'bg-emerald-500 ring-emerald-600 text-white';
-      case 'partially':  return 'bg-amber-400 ring-amber-500 text-gray-900';
-      case 'not_done':   return 'bg-rose-500 ring-rose-600 text-white';
-      default:           return 'bg-gray-300 ring-gray-400 text-gray-800';
+      case 'done': return 'bg-emerald-500 ring-emerald-600 text-gray-900';
+      case 'partially': return 'bg-amber-400 ring-amber-500 text-gray-900';
+      case 'not_done': return 'bg-rose-500 ring-rose-600 text-gray-900';
+      default: return 'bg-gray-300 ring-gray-400 text-gray-800';
     }
   }
 }
@@ -154,8 +154,8 @@ export class PublicCalendarComponent implements OnInit {
 /* ===== Helpers ===== */
 function startOfMonth(d: Date): Date { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function updateMonth(d: Date, delta: number): Date { const nd = new Date(d); nd.setMonth(nd.getMonth() + delta); return startOfMonth(nd); }
-function startOfWeekMonday(d: Date): Date { const day = (d.getDay() + 6) % 7; const sd = new Date(d); sd.setDate(d.getDate() - day); sd.setHours(0,0,0,0); return sd; }
-function isSameDate(a: Date, b: Date): boolean { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function startOfWeekMonday(d: Date): Date { const day = (d.getDay() + 6) % 7; const sd = new Date(d); sd.setDate(d.getDate() - day); sd.setHours(0, 0, 0, 0); return sd; }
+function isSameDate(a: Date, b: Date): boolean { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
 function buildMonthMatrix(base: Date): DayCell[][] {
   const first = startOfMonth(base);
   const start = startOfWeekMonday(first);
