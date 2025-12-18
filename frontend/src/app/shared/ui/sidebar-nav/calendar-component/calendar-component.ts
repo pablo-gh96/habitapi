@@ -36,6 +36,9 @@ export class CalendarComponent implements OnInit {
     }
   }
 
+  isMobile(): boolean {
+    return window.innerWidth < 640; // 640px es el breakpoint 'sm' de Tailwind
+  }
   private readonly route = inject(ActivatedRoute);
   username = sessionStorage.getItem('username') || '';
   private router = inject(Router);

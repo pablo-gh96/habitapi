@@ -22,4 +22,10 @@ export class GenericLayoutComponent {
     // Redirige al login
     this.router.navigate(['/login']);
   }
+
+  isSidebarOpen = false;
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
 }
